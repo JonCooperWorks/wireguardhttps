@@ -17,14 +17,6 @@ func init() {
 }
 
 func main() {
-	currentUser, err := user.Current()
-	if err != nil {
-		log.Fatalf("failed to get current user: %v", err)
-	}
-
-	if currentUser.Uid == "0" {
-		log.Fatalln("wireguardhttps must not be run as root.")
-	}
 	log.Println("wireguardhttps 0.0.1")
 	log.Println("This software has not been audited.\nVulnerabilities in this can compromise your server and user data.\nDo not run this in production")
 
