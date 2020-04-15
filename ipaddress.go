@@ -34,7 +34,7 @@ func (a *AddressRange) Start() net.IP {
 
 // Next returns the next IP address within a subnet given the last IP address.
 // It will fail with an error if the IP address in not within the subnet, or if the subnet has run out of IP addresses.
-// Callers should prevent IP address conflicts, by ensuring only one IP address can be assigned at a time in a subnet, such as by using a `sync.Mutex`.
+// Callers should prevent IP address conflicts, by ensuring only one IP address can be assigned at a time in a subnet, such as by using a `sync.Mutex` before checking the IP address data store and unlocking it after updating the data store with the newly allocated IP.
 func (a *AddressRange) Next(current net.IP) (net.IP, error) {
 	if !a.Network.Contains(current) {
 		return nil, &IPNotInSubnetError{
