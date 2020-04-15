@@ -23,7 +23,7 @@ func (i *IPsExhaustedError) Error() string {
 	return fmt.Sprintf("%v is out of IP addresses", i.Network)
 }
 
-// AddressRange provides methods for managing IP addresses within a
+// AddressRange provides methods for assigning IP addresses within a subnet.
 type AddressRange struct {
 	Network net.IPNet
 }
@@ -32,6 +32,9 @@ func (a *AddressRange) Start() net.IP {
 	return a.Network.IP
 }
 
+// Next returns the next IP address within a subnet given the last IP address.
+// It will fail with an error if the IP address in not within the subnet, or if the subnet has run out of IP addresses.
+// Callers should prevent IP address conflicts, by ensuring only one IP address can be assigned at a time in a subnet, such as by using a `sync.Mutex`.
 func (a *AddressRange) Next(current net.IP) (net.IP, error) {
 	if !a.Network.Contains(current) {
 		return nil, &IPNotInSubnetError{
