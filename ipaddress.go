@@ -32,8 +32,7 @@ func (a *AddressRange) Start() net.IP {
 	return a.Network.IP
 }
 
-func (a *AddressRange) Next(currentIP net.IPNet) (*net.IP, error) {
-	current := currentIP.IP
+func (a *AddressRange) Next(current net.IP) (*net.IP, error) {
 
 	if !a.Network.Contains(current) {
 		return nil, &IPNotInSubnetError{
