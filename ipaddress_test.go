@@ -46,6 +46,10 @@ func TestErrorReturnedIPNotInNetwork(t *testing.T) {
 	if err == nil {
 		t.Errorf("Expected error: %v is not in subnet %v", incorrectIP, network)
 	}
+
+	if _, ok := err.(*IPNotInSubnetError); !ok {
+		t.Errorf("Expected IPNotInSubneterror, got %v", err)
+	}
 }
 
 func TestErrorReturnedEndOfSubnet(t *testing.T) {
@@ -55,6 +59,10 @@ func TestErrorReturnedEndOfSubnet(t *testing.T) {
 	_, err := addressRange.Next(finalIP)
 	if err == nil {
 		t.Errorf("Expected error: %v is the last address in subnet %v", finalIP, network)
+	}
+
+	if _, ok := err.(*IPsExhaustedError); !ok {
+		t.Errorf("Expected IPsExhaustedError, got %v", err)
 	}
 }
 

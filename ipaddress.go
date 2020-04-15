@@ -2,9 +2,26 @@ package wireguardhttps
 
 import (
 	"encoding/binary"
-	"errors"
+	"fmt"
 	"net"
 )
+
+type IPNotInSubnetError struct {
+	Network net.IPNet
+	IP      net.IP
+}
+
+func (i *IPNotInSubnetError) Error() string {
+	return fmt.Sprintf("%v is not in subnet %v", i.IP, i.Network)
+}
+
+type IPsExhaustedError struct {
+	Network net.IPNet
+}
+
+func (i *IPsExhaustedError) Error() string {
+	return fmt.Sprintf("%v is out of IP addresses", i.Network)
+}
 
 // AddressRange provides methods for managing IP addresses within a
 type AddressRange struct {
@@ -18,14 +35,17 @@ func (a *AddressRange) Start() net.IP {
 func (a *AddressRange) Next(currentIP net.IPNet) (*net.IP, error) {
 	current := currentIP.IP
 
-	// TODO: specific error for IP not in range
 	if !a.Network.Contains(current) {
-		return nil, errors.New("")
+		return nil, &IPNotInSubnetError{
+			Network: a.Network,
+			IP:      current,
+		}
 	}
 
-	// TODO: specific error for out of IP addresses
 	if current.Equal(a.Finish()) {
-		return nil, errors.New("")
+		return nil, &IPsExhaustedError{
+			Network: a.Network,
+		}
 	}
 
 	ip := make(net.IP, 4)
