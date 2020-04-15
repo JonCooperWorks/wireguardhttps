@@ -6,7 +6,7 @@ import (
 )
 
 type ServerConfig struct {
-	Subnet   net.IPNet
+	Subnet *AddressRange
 	DNSs     net.IP
 	Endpoint url.URL
 }
