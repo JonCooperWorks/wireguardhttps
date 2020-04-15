@@ -32,7 +32,7 @@ func (a *AddressRange) Start() net.IP {
 	return a.Network.IP
 }
 
-func (a *AddressRange) Next(current net.IP) (*net.IP, error) {
+func (a *AddressRange) Next(current net.IP) (net.IP, error) {
 
 	if !a.Network.Contains(current) {
 		return nil, &IPNotInSubnetError{
@@ -50,7 +50,7 @@ func (a *AddressRange) Next(current net.IP) (*net.IP, error) {
 	ip := make(net.IP, 4)
 	next := binary.BigEndian.Uint32(current) + 1
 	binary.BigEndian.PutUint32(ip, next)
-	return &ip, nil
+	return ip, nil
 }
 
 func (a *AddressRange) Finish() net.IP {
