@@ -10,7 +10,7 @@ func TestAddressRangeStart(t *testing.T) {
 	addressRange := &AddressRange{network}
 	expectedStart := net.ParseIP("10.0.0.0")
 	if !addressRange.Start().Equal(expectedStart) {
-		t.Errorf("Expected %v, got %v", expectedStart, addressRange.Start())
+		t.Fatalf("Expected %v, got %v", expectedStart, addressRange.Start())
 	}
 }
 
@@ -19,7 +19,7 @@ func TestAddressRangeFinish(t *testing.T) {
 	addressRange := &AddressRange{network}
 	expectedFinish := net.ParseIP("10.0.0.255")
 	if !addressRange.Finish().Equal(expectedFinish) {
-		t.Errorf("Expected %v, got %v", expectedFinish, addressRange.Finish())
+		t.Fatalf("Expected %v, got %v", expectedFinish, addressRange.Finish())
 	}
 }
 
@@ -30,11 +30,11 @@ func TestNextAddressAddressInRange(t *testing.T) {
 	expectedNext := net.ParseIP("10.0.0.2")
 	actualNext, err := addressRange.Next(currentIP.IP)
 	if err != nil {
-		t.Errorf("Error getting next IP: %v", err)
+		t.Fatalf("Error getting next IP: %v", err)
 	}
 
 	if !actualNext.Equal(expectedNext) {
-		t.Errorf("Expected %v, got %v", expectedNext, actualNext)
+		t.Fatalf("Expected %v, got %v", expectedNext, actualNext)
 	}
 }
 
@@ -44,11 +44,11 @@ func TestErrorReturnedIPNotInNetwork(t *testing.T) {
 	incorrectIP := mustParseCIDR("192.168.1.1/32")
 	_, err := addressRange.Next(incorrectIP.IP)
 	if err == nil {
-		t.Errorf("Expected error: %v is not in subnet %v", incorrectIP, network)
+		t.Fatalf("Expected error: %v is not in subnet %v", incorrectIP, network)
 	}
 
 	if _, ok := err.(*IPNotInSubnetError); !ok {
-		t.Errorf("Expected IPNotInSubneterror, got %v", err)
+		t.Fatalf("Expected IPNotInSubneterror, got %v", err)
 	}
 }
 
@@ -63,12 +63,12 @@ func TestAddresses(t *testing.T) {
 	}
 	actualAddresses := addressRange.Addresses()
 	if len(actualAddresses) != len(expectedAddresses) {
-		t.Errorf("Expected %v, got %v", expectedAddresses, actualAddresses)
+		t.Fatalf("Expected %v, got %v", expectedAddresses, actualAddresses)
 	}
 
 	for index, address := range actualAddresses {
 		if !expectedAddresses[index].Equal(address) {
-			t.Errorf("Expected %v, got %v", expectedAddresses, actualAddresses)
+			t.Fatalf("Expected %v, got %v", expectedAddresses, actualAddresses)
 		}
 	}
 }
@@ -79,11 +79,11 @@ func TestErrorReturnedEndOfSubnet(t *testing.T) {
 	finalIP := mustParseCIDR("10.0.0.255/32")
 	_, err := addressRange.Next(finalIP.IP)
 	if err == nil {
-		t.Errorf("Expected error: %v is the last address in subnet %v", finalIP, network)
+		t.Fatalf("Expected error: %v is the last address in subnet %v", finalIP, network)
 	}
 
 	if _, ok := err.(*IPsExhaustedError); !ok {
-		t.Errorf("Expected IPsExhaustedError, got %v", err)
+		t.Fatalf("Expected IPsExhaustedError, got %v", err)
 	}
 }
 
