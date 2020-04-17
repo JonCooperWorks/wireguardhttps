@@ -52,6 +52,27 @@ func TestErrorReturnedIPNotInNetwork(t *testing.T) {
 	}
 }
 
+func TestAddresses(t *testing.T) {
+	network := mustParseCIDR("10.0.0.0/30")
+	addressRange := &AddressRange{network}
+	expectedAddresses := []net.IP{
+		net.ParseIP("10.0.0.0"),
+		net.ParseIP("10.0.0.1"),
+		net.ParseIP("10.0.0.2"),
+		net.ParseIP("10.0.0.3"),
+	}
+	actualAddresses := addressRange.Addresses()
+	if len(actualAddresses) != len(expectedAddresses) {
+		t.Errorf("Expected %v, got %v", expectedAddresses, actualAddresses)
+	}
+
+	for index, address := range actualAddresses {
+		if !expectedAddresses[index].Equal(address) {
+			t.Errorf("Expected %v, got %v", expectedAddresses, actualAddresses)
+		}
+	}
+}
+
 func TestErrorReturnedEndOfSubnet(t *testing.T) {
 	network := mustParseCIDR("10.0.0.0/24")
 	addressRange := &AddressRange{network}

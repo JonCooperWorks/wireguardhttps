@@ -55,6 +55,19 @@ func (a *AddressRange) Next(current net.IP) (net.IP, error) {
 	return ip, nil
 }
 
+// Addresses returns all IP addresses within a CIDR.
+func (a *AddressRange) Addresses() []net.IP {
+	addresses := []net.IP{}
+	start := binary.BigEndian.Uint32(a.Start())
+	finish := binary.BigEndian.Uint32(a.Finish())
+	for i := start; i <= finish; i++ {
+		ip := make(net.IP, 4)
+		binary.BigEndian.PutUint32(ip, i)
+		addresses = append(addresses, ip)
+	}
+	return addresses
+}
+
 func (a *AddressRange) Finish() net.IP {
 	mask := binary.BigEndian.Uint32(a.Network.Mask)
 	start := binary.BigEndian.Uint32(a.Start())
