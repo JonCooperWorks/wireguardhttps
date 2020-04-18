@@ -13,7 +13,8 @@ type IPAddress struct {
 
 type Device struct {
 	gorm.Model
-	IPAddress IPAddress `gorm:"UNIQUE"`
+	IP        IPAddress `gorm:"foreignkey:IPAddress"`
+	IPAddress net.IP    `gorm:"UNIQUE"`
 	Name      string
 	OS        string
 	User      User
