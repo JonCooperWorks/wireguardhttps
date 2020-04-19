@@ -13,6 +13,8 @@ import (
 
 func main() {
 	app := cli.App{
+		Usage:       "The easier way to use Wireguard",
+		Description: "Allows Wireguard management via HTTPS.",
 		Commands: []*cli.Command{
 			{
 				Name:        "initialize",
