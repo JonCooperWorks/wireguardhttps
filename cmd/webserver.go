@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 
+	"github.com/joncooperworks/wgrpcd"
 	"github.com/joncooperworks/wireguardhttps"
 	"github.com/urfave/cli/v2"
 )
@@ -68,7 +69,7 @@ func main() {
 						Usage: "directory containing templates for Wireguard config",
 					},
 					&cli.StringFlag{
-						Name: "wireguard-device",
+						Name:  "wireguard-device",
 						Value: "wg0",
 						Usage: "wireguard device name as shown in network interfaces",
 					},
@@ -128,7 +129,7 @@ func actionServe(c *cli.Context) error {
 		TemplatesDirectory: templatesDirectory,
 		WireguardClient: &wgrpcd.Client{
 			GrpcAddress: wgRPCdAddress,
-			DeviceName: wireguardDevice,
+			DeviceName:  wireguardDevice,
 		},
 	}
 
