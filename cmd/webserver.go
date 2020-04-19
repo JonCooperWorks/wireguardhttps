@@ -42,8 +42,8 @@ func main() {
 						Usage: "the fully qualified domain name of the Wireguard server",
 					},
 					&cli.StringSliceFlag{
-						Name:  "dns-servers",
-						Usage: "a list of DNS server IP addresses",
+						Name:  "client-dns",
+						Usage: "a list of DNS server IP addresses for clients",
 						Value: cli.NewStringSlice("1.1.1.1"),
 					},
 					&cli.StringFlag{
@@ -60,6 +60,10 @@ func main() {
 						Name:  "http-insecure",
 						Value: false,
 						Usage: "listen over insecure http instead of https. not recommended for production",
+					},
+					&cli.StringFlag{
+						Name:  "templates-directory",
+						Usage: "directory containing templates for Wireguard config",
 					},
 				},
 				Action: actionServe,
@@ -102,14 +106,17 @@ func actionServe(c *cli.Context) error {
 		return fmt.Errorf("--wireguard-host must be a valid URL, got %v", serverHostName)
 	}
 
-	dnsServers, err := stringsToIPs(c.StringSlice("dns-servers"))
+	dnsServers, err := stringsToIPs(c.StringSlice("client-dns"))
 	if err != nil {
-		return fmt.Errorf("--dns-servers must be valid IP addresses. %v", err)
+		return fmt.Errorf("--client-dns must be valid IP addresses. %v", err)
 	}
 
+	templatesDirectory := c.String("templates-directory")
+
 	config := &wireguardhttps.ServerConfig{
-		DNSServers: dnsServers,
-		Endpoint:   url,
+		DNSServers:         dnsServers,
+		Endpoint:           url,
+		TemplatesDirectory: templatesDirectory,
 	}
 
 	prompt()

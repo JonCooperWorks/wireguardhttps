@@ -6,6 +6,7 @@ import (
 )
 
 type ServerConfig struct {
-	DNSServers []net.IP
-	Endpoint   *url.URL
+	DNSServers         []net.IP
+	Endpoint           *url.URL
+	TemplatesDirectory string
 }
