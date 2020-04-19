@@ -67,6 +67,11 @@ func main() {
 						Name:  "templates-directory",
 						Usage: "directory containing templates for Wireguard config",
 					},
+					&cli.StringFlag{
+						Name: "wireguard-device",
+						Value: "wg0",
+						Usage: "wireguard device name as shown in network interfaces",
+					},
 				},
 				Action: actionServe,
 			},
@@ -114,11 +119,17 @@ func actionServe(c *cli.Context) error {
 	}
 
 	templatesDirectory := c.String("templates-directory")
+	wgRPCdAddress := c.String("wgrpcd-address")
+	wireguardDevice := c.String("wireguard-device")
 
 	config := &wireguardhttps.ServerConfig{
 		DNSServers:         dnsServers,
 		Endpoint:           url,
 		TemplatesDirectory: templatesDirectory,
+		WireguardClient: &wgrpcd.Client{
+			GrpcAddress: wgRPCdAddress,
+			DeviceName: wireguardDevice,
+		},
 	}
 
 	prompt()
