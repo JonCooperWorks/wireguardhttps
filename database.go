@@ -80,7 +80,7 @@ func (pd *postgresDatabase) RegisterUser(name, email, authPlatformUserID, authPl
 
 func (pd *postgresDatabase) GetUser(userID int) (UserProfile, error) {
 	var user UserProfile
-	err := pd.db.First(&UserProfile{}, userID).Error
+	err := pd.db.First(user, userID).Error
 	return user, err
 }
 
