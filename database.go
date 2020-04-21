@@ -46,7 +46,7 @@ func (pd *postgresDatabase) AllocateSubnet(addresses []net.IP) error {
 	// Don't allocate broadcast or network address.
 	for _, address := range addresses[1 : len(addresses)-1] {
 		ipAddress := IPAddress{
-			Address: address,
+			Address: address.String(),
 		}
 		databaseInput = append(databaseInput, ipAddress)
 	}
