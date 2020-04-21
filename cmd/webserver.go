@@ -77,6 +77,10 @@ func main() {
 						Value: "wg0",
 						Usage: "wireguard device name as shown in network interfaces",
 					},
+					&cli.StringFlag{
+						Name:  "connection-string",
+						Usage: "postgresql database connection strings",
+					},
 				},
 				Action: actionServe,
 			},
