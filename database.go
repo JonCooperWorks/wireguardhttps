@@ -10,6 +10,7 @@ type Database interface {
 	Initialize() error
 	AllocateSubnet(addresses []net.IP) error
 	CreateDevice(owner UserProfile, name, os string) (Device, error)
+	RekeyDevice(owner UserProfile, device Device) (Device, error)
 	Devices(owner UserProfile) ([]Device, error)
 	Device(owner UserProfile, deviceID int) (Device, error)
 	RemoveDevice(owner UserProfile, device Device) error

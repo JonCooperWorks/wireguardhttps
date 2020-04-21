@@ -60,6 +60,10 @@ func (pd *postgresDatabase) CreateDevice(owner UserProfile, name, os string) (De
 	return Device{}, nil
 }
 
+func (pd *postgresDatabase) RekeyDevice(owner UserProfile, device Device) (Device, error) {
+	return Device{}, nil
+}
+
 func (pd *postgresDatabase) Devices(owner UserProfile) ([]Device, error) {
 	return []Device{}, nil
 }
