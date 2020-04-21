@@ -20,12 +20,23 @@ func NewPostgresDatabase(connectionString string) (Database, error) {
 	return &postgresDatabase{db: db}, nil
 }
 
+func wrapPackageError(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	if gorm.IsRecordNotFoundError(err) {
+		return &RecordNotFoundError{err: err}
+	}
+	return &DatabaseError{err: err}
+}
+
 func (pd *postgresDatabase) Initialize() error {
-	return pd.db.AutoMigrate(&UserProfile{}, &Device{}, IPAddress{}).Error
+	return wrapPackageError(pd.db.AutoMigrate(&UserProfile{}, &Device{}, IPAddress{}).Error)
 }
 
 func (pd *postgresDatabase) Close() error {
-	return pd.db.Close()
+	return wrapPackageError(pd.db.Close())
 }
 
 func (pd *postgresDatabase) AllocateSubnet(addresses []net.IP) error {
@@ -40,7 +51,7 @@ func (pd *postgresDatabase) AllocateSubnet(addresses []net.IP) error {
 
 	err := gormbulk.BulkInsert(pd.db, databaseInput, 3000)
 	if err != nil {
-		return err
+		return wrapPackageError(err)
 	}
 	return nil
 }
@@ -68,7 +79,7 @@ func (pd *postgresDatabase) RegisterUser(name, email, authPlatformUserID, authPl
 func (pd *postgresDatabase) GetUser(userID int) (UserProfile, error) {
 	var user UserProfile
 	err := pd.db.First(user, userID).Error
-	return user, err
+	return user, wrapPackageError(err)
 }
 
 func (pd *postgresDatabase) DeleteUser(userID int) error {
