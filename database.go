@@ -16,6 +16,7 @@ type Database interface {
 	Device(owner UserProfile, deviceID int) (Device, error)
 	RemoveDevice(owner UserProfile, device Device) error
 	RegisterUser(name, email, authPlatformUserID, authPlatform string) (UserProfile, error)
+	GetUser(userID int) (UserProfile, error)
 	DeleteUser(userID int) error
 	Close() error
 }
@@ -33,8 +34,7 @@ func NewPostgresDatabase(connectionString string) (Database, error) {
 }
 
 func (pd *postgresDatabase) Initialize() error {
-	pd.db.AutoMigrate(&UserProfile{}, &Device{}, IPAddress{})
-	return nil
+	return pd.db.AutoMigrate(&UserProfile{}, &Device{}, IPAddress{}).Error
 }
 
 func (pd *postgresDatabase) Close() error {
@@ -76,6 +76,12 @@ func (pd *postgresDatabase) RemoveDevice(owner UserProfile, device Device) error
 
 func (pd *postgresDatabase) RegisterUser(name, email, authPlatformUserID, authPlatform string) (UserProfile, error) {
 	return UserProfile{}, nil
+}
+
+func (pd *postgresDatabase) GetUser(userID int) (UserProfile, error) {
+	var user UserProfile
+	err := pd.db.First(&UserProfile{}, userID).Error
+	return user, err
 }
 
 func (pd *postgresDatabase) DeleteUser(userID int) error {
