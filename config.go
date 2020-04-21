@@ -12,4 +12,5 @@ type ServerConfig struct {
 	Endpoint           *url.URL
 	TemplatesDirectory string
 	WireguardClient    *wgrpcd.Client
+	Database           Database
 }

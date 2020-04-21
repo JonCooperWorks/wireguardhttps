@@ -27,6 +27,10 @@ func main() {
 						Value: "10.0.0.0/24",
 						Usage: "the client device subnet in valid CIDR notation (example: 10.0.0.0/24)",
 					},
+					&cli.StringFlag{
+						Name:  "connection-string",
+						Usage: "postgresql database connection strings",
+					},
 				},
 				Action: actionInitialize,
 			},
@@ -98,7 +102,27 @@ func actionInitialize(c *cli.Context) error {
 	}
 	addressRange := &wireguardhttps.AddressRange{Network: *network}
 	prompt()
-	log.Println(addressRange.Addresses())
+	log.Println("Allocating IP addresses in", network)
+
+	connectionString := c.String("connection-string")
+	database, err := wireguardhttps.NewPostgresDatabase(connectionString)
+	if err != nil {
+		return err
+	}
+	defer database.Close()
+
+	err = database.Initialize()
+	if err != nil {
+		return err
+	}
+
+	addresses := addressRange.Addresses()
+	err = database.AllocateSubnet(addresses)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Allocated %v addresses in %v\n", len(addresses), network)
 	return nil
 }
 
@@ -122,15 +146,31 @@ func actionServe(c *cli.Context) error {
 	templatesDirectory := c.String("templates-directory")
 	wgRPCdAddress := c.String("wgrpcd-address")
 	wireguardDevice := c.String("wireguard-device")
+	connectionString := c.String("connection-string")
+
+	database, err := wireguardhttps.NewPostgresDatabase(connectionString)
+	if err != nil {
+		return err
+	}
+	defer database.Close()
+
+	err = database.Initialize()
+	if err != nil {
+		return err
+	}
+
+	// TODO: Check if IP addresses have been allocated in the database before running the program
 
 	config := &wireguardhttps.ServerConfig{
 		DNSServers:         dnsServers,
 		Endpoint:           url,
 		TemplatesDirectory: templatesDirectory,
+		// TODO: Refactor this to ensure invalid device names fail immediately
 		WireguardClient: &wgrpcd.Client{
 			GrpcAddress: wgRPCdAddress,
 			DeviceName:  wireguardDevice,
 		},
+		Database: database,
 	}
 
 	prompt()
