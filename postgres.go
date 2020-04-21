@@ -21,7 +21,7 @@ func NewPostgresDatabase(connectionString string) (Database, error) {
 }
 
 func (pd *postgresDatabase) Initialize() error {
-	return pd.db.AutoMigrate(&UserProfile{}, &Device{}, IPAddress{}).Error
+	return pd.db.AutoMigrate(UserProfile{}, Device{}, IPAddress{}).Error
 }
 
 func (pd *postgresDatabase) Close() error {
