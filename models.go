@@ -1,10 +1,7 @@
 package wireguardhttps
 
 import (
-	"net"
-
 	"github.com/jinzhu/gorm"
-	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 )
 
 // IPAddress is a single IP address.
@@ -21,11 +18,11 @@ type IPAddress struct {
 type Device struct {
 	gorm.Model
 	IP        IPAddress `gorm:"foreignkey:IPAddress"`
-	IPAddress net.IP    `gorm:"UNIQUE"`
+	IPAddress string    `gorm:"UNIQUE"`
 	Name      string
 	OS        string
 	User      UserProfile
-	PublicKey wgtypes.Key `gorm:"UNIQUE"`
+	PublicKey string `gorm:"UNIQUE"`
 }
 
 // UserProfile represents a user who authenticated using an OpenID integration.
