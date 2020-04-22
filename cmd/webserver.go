@@ -182,6 +182,7 @@ func actionServe(c *cli.Context) error {
 	azureADKey := c.String("azure-ad-key")
 	azureADSecret := c.String("azure-ad-secret")
 	azureADCallbackURL := c.String("azure-ad-callback-url")
+	listenAddr := c.String("http-listen-addr")
 
 	database, err := wireguardhttps.NewPostgresDatabase(connectionString)
 	if err != nil {
@@ -215,7 +216,7 @@ func actionServe(c *cli.Context) error {
 
 	prompt()
 	log.Println(config)
-	return router.Run()
+	return router.Run(listenAddr)
 }
 
 func stringsToIPs(rawIPs []string) ([]net.IP, error) {
