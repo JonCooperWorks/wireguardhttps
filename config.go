@@ -5,7 +5,6 @@ import (
 	"net/url"
 
 	"github.com/joncooperworks/wgrpcd"
-	"github.com/markbates/goth"
 )
 
 type ServerConfig struct {
@@ -15,5 +14,4 @@ type ServerConfig struct {
 	TemplatesDirectory string
 	WireguardClient    *wgrpcd.Client
 	Database           Database
-	AuthProviders      []goth.Provider
 }
