@@ -77,7 +77,7 @@ func main() {
 						Value: false,
 						Usage: "listen over insecure http instead of https. not recommended for production",
 					},
-					&cli.StringFlag{
+					&cli.PathFlag{
 						Name:     "templates-directory",
 						Usage:    "directory containing templates for Wireguard config",
 						Required: true,
@@ -175,7 +175,7 @@ func actionServe(c *cli.Context) error {
 		return fmt.Errorf("--client-dns must be valid IP addresses. %v", err)
 	}
 
-	templatesDirectory := c.String("templates-directory")
+	templatesDirectory := c.Path("templates-directory")
 	wgRPCdAddress := c.String("wgrpcd-address")
 	wireguardDevice := c.String("wireguard-device")
 	connectionString := c.String("connection-string")
