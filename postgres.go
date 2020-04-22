@@ -60,26 +60,30 @@ func (pd *postgresDatabase) createIPAddress() (IPAddress, error) {
 	var ipAddress IPAddress
 	row := pd.db.Raw("SELECT ip.address FROM ip_addresses ip WHERE NOT EXISTS (SELECT d.ip_address FROM devices d WHERE  d.ip_address = ip.address) LIMIT 1").Row()
 	err := row.Scan(&ipAddress)
-	return ipAddress, wrapPackageError(err)
+	return ipAddress, err
 }
 
 func (pd *postgresDatabase) CreateDevice(owner UserProfile, name, os, publicKey string) (Device, error) {
-	ipAddress, err := pd.createIPAddress()
-	if err != nil {
-		return Device{}, err
-	}
+	var device Device
+	err := pd.db.Transaction(func(db *gorm.DB) error {
+		ipAddress, err := pd.createIPAddress()
+		if err != nil {
+			return err
+		}
 
-	device := Device{
-		Name:      name,
-		OS:        os,
-		PublicKey: publicKey,
-		IPAddress: ipAddress.Address,
-	}
-	err = pd.db.Create(&device).Error
-	if err != nil {
-		return Device{}, wrapPackageError(err)
-	}
-	return device, nil
+		device = Device{
+			Name:      name,
+			OS:        os,
+			PublicKey: publicKey,
+			IPAddress: ipAddress.Address,
+		}
+		err = pd.db.Create(&device).Error
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	return device, wrapPackageError(err)
 }
 
 func (pd *postgresDatabase) RekeyDevice(owner UserProfile, publicKey string, device Device) (Device, error) {
