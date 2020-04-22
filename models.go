@@ -31,7 +31,7 @@ type Device struct {
 type UserProfile struct {
 	gorm.Model
 	Name               string
-	Email              string
-	AuthPlatformUserID string
+	Email              string `gorm:"UNIQUE"`
+	AuthPlatformUserID string `gorm:"UNIQUE"`
 	AuthPlatform       string
 }

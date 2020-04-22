@@ -113,7 +113,7 @@ func (pd *postgresDatabase) RegisterUser(name, email, authPlatformUserID, authPl
 		AuthPlatformUserID: authPlatformUserID,
 		AuthPlatform:       authPlatform,
 	}
-	err := pd.db.Create(&user).Error
+	err := pd.db.FirstOrCreate(&user).Error
 	return user, wrapPackageError(err)
 }
 
