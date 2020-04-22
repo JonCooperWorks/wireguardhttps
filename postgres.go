@@ -15,7 +15,7 @@ type postgresDatabase struct {
 func NewPostgresDatabase(connectionString string) (Database, error) {
 	db, err := gorm.Open("postgres", connectionString)
 	if err != nil {
-		return nil, err
+		return nil, wrapPackageError(err)
 	}
 	return &postgresDatabase{db: db}, nil
 }
@@ -56,20 +56,46 @@ func (pd *postgresDatabase) AllocateSubnet(addresses []net.IP) error {
 	return nil
 }
 
-func (pd *postgresDatabase) CreateDevice(owner UserProfile, name, os string) (Device, error) {
-	return Device{}, nil
+func (pd *postgresDatabase) createIPAddress() (IPAddress, error) {
+	var ipAddress IPAddress
+	row := pd.db.Raw("SELECT ip.address FROM ip_addresses ip WHERE NOT EXISTS (SELECT d.ip_address FROM devices d WHERE  d.ip_address = ip.address) LIMIT 1").Row()
+	err := row.Scan(&ipAddress)
+	return ipAddress, wrapPackageError(err)
 }
 
-func (pd *postgresDatabase) RekeyDevice(owner UserProfile, device Device) (Device, error) {
+func (pd *postgresDatabase) CreateDevice(owner UserProfile, name, os, publicKey string) (Device, error) {
+	ipAddress, err := pd.createIPAddress()
+	if err != nil {
+		return Device{}, err
+	}
+
+	device := Device{
+		Name:      name,
+		OS:        os,
+		PublicKey: publicKey,
+		IPAddress: ipAddress.Address,
+	}
+	err = pd.db.Create(&device).Error
+	if err != nil {
+		return Device{}, wrapPackageError(err)
+	}
+	return device, nil
+}
+
+func (pd *postgresDatabase) RekeyDevice(owner UserProfile, publicKey string, device Device) (Device, error) {
 	return Device{}, nil
 }
 
 func (pd *postgresDatabase) Devices(owner UserProfile) ([]Device, error) {
-	return []Device{}, nil
+	var devices []Device
+	err := pd.db.Find(&devices).Where("owner = ?", owner.ID).Error
+	return devices, wrapPackageError(err)
 }
 
 func (pd *postgresDatabase) Device(owner UserProfile, deviceID int) (Device, error) {
-	return Device{}, nil
+	var device Device
+	err := pd.db.First(device, deviceID).Where("owner = ?", owner.ID).Error
+	return device, wrapPackageError(err)
 }
 
 func (pd *postgresDatabase) RemoveDevice(owner UserProfile, device Device) error {
@@ -77,7 +103,14 @@ func (pd *postgresDatabase) RemoveDevice(owner UserProfile, device Device) error
 }
 
 func (pd *postgresDatabase) RegisterUser(name, email, authPlatformUserID, authPlatform string) (UserProfile, error) {
-	return UserProfile{}, nil
+	user := UserProfile{
+		Name:               name,
+		Email:              email,
+		AuthPlatformUserID: authPlatformUserID,
+		AuthPlatform:       authPlatform,
+	}
+	err := pd.db.Create(&user).Error
+	return UserProfile{}, wrapPackageError(err)
 }
 
 func (pd *postgresDatabase) GetUser(userID int) (UserProfile, error) {
