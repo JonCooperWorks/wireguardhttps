@@ -94,7 +94,7 @@ func Router(config *ServerConfig) *gin.Engine {
 	router.GET("/auth/authenticate", handlers.authenticateHandler)
 	router.GET("/auth/logout", handlers.logoutHandler)
 
-	private := router.Group("/private")
+	private := router.Group("/")
 	private.Use(AuthRequiredMiddleware)
 
 	// Devices
