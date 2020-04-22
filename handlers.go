@@ -90,9 +90,9 @@ func Router(config *ServerConfig) *gin.Engine {
 	router := gin.Default()
 	handlers := &WireguardHandlers{config: config}
 	// Authentication
-	router.GET("/auth/:provider/callback", handlers.oauthCallbackHandler)
-	router.GET("/auth/:provider/authenticate", handlers.authenticateHandler)
-	router.GET("/auth/:provider/logout", handlers.logoutHandler)
+	router.GET("/auth/callback", handlers.oauthCallbackHandler)
+	router.GET("/auth/authenticate", handlers.authenticateHandler)
+	router.GET("/auth/logout", handlers.logoutHandler)
 
 	private := router.Group("/private")
 	private.Use(AuthRequiredMiddleware)
