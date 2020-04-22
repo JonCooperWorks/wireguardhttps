@@ -15,6 +15,7 @@ func (wh *WireguardHandlers) oauthCallbackHandler(c *gin.Context) {
 	gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
 		// TODO: Error message
+		c.Status(401)
 		return
 	}
 
@@ -70,7 +71,7 @@ func (wh *WireguardHandlers) rekeyDeviceHandler(c *gin.Context) {
 }
 
 func (wh *WireguardHandlers) listUserDevicesHandler(c *gin.Context) {
-
+	
 }
 
 func (wh *WireguardHandlers) getUserDeviceHandler(c *gin.Context) {
@@ -89,19 +90,19 @@ func Router(config *ServerConfig) *gin.Engine {
 	router := gin.Default()
 	handlers := &WireguardHandlers{config: config}
 	// Authentication
-	router.GET("/auth/callback", handlers.oauthCallbackHandler)
-	router.GET("/auth/authenticate", handlers.authenticateHandler)
-	router.GET("/auth/logout", handlers.logoutHandler)
+	router.GET("/auth/:provider/callback", handlers.oauthCallbackHandler)
+	router.GET("/auth/:provider/authenticate", handlers.authenticateHandler)
+	router.GET("/auth/:provider/logout", handlers.logoutHandler)
 
-	private := router.Group()
+	private := router.Group("/private")
 	private.Use(AuthRequiredMiddleware)
 
 	// Devices
 	private.POST("/devices", handlers.newDeviceHandler)
-	private.POST("/devices/{device_id}", handlers.rekeyDeviceHandler)
-	private.DELETE("/devices/{device_id}", handlers.deleteDeviceHandler)
+	private.POST("/devices/:device_id", handlers.rekeyDeviceHandler)
+	private.DELETE("/devices/:device_id", handlers.deleteDeviceHandler)
 	private.GET("/devices", handlers.listUserDevicesHandler)
-	private.GET("/devices/{device_id}", handlers.getUserDeviceHandler)
+	private.GET("/devices/:device_id", handlers.getUserDeviceHandler)
 
 	// User Profile
 	private.GET("/me", handlers.userProfileInfoHandler)
