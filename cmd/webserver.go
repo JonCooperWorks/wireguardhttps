@@ -67,10 +67,10 @@ func main() {
 						Value: "localhost:15002",
 						Usage: "the wgrpcd gRPC server on localhost. It must be running to run this program.",
 					},
-					&cli.IntFlag{
-						Name:  "web-listen-port",
-						Value: 443,
-						Usage: "port to listen on",
+					&cli.StringFlag{
+						Name:  "http-listen-addr",
+						Value: ":443",
+						Usage: "the port to listen for http requests on",
 					},
 					&cli.BoolFlag{
 						Name:  "http-insecure",
@@ -211,10 +211,11 @@ func actionServe(c *cli.Context) error {
 			azuread.New(azureADKey, azureADSecret, azureADCallbackURL, nil),
 		},
 	}
+	router := wireguardhttps.Router(config)
 
 	prompt()
 	log.Println(config)
-	return nil
+	return router.Run()
 }
 
 func stringsToIPs(rawIPs []string) ([]net.IP, error) {
