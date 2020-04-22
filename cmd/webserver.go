@@ -9,6 +9,8 @@ import (
 
 	"github.com/joncooperworks/wgrpcd"
 	"github.com/joncooperworks/wireguardhttps"
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/providers/azuread"
 	"github.com/urfave/cli/v2"
 )
 
@@ -28,8 +30,9 @@ func main() {
 						Usage: "the client device subnet in valid CIDR notation (example: 10.0.0.0/24)",
 					},
 					&cli.StringFlag{
-						Name:  "connection-string",
-						Usage: "postgresql database connection strings",
+						Name:     "connection-string",
+						Usage:    "postgresql database connection strings",
+						Required: true,
 					},
 				},
 				Action: actionInitialize,
@@ -45,8 +48,14 @@ func main() {
 						Usage: "the port the Wireguard VPN listens on",
 					},
 					&cli.StringFlag{
-						Name:  "wireguard-host",
-						Usage: "the fully qualified domain name of the Wireguard server",
+						Name:     "wireguard-host",
+						Usage:    "the fully qualified domain name of the Wireguard server",
+						Required: true,
+					},
+					&cli.StringFlag{
+						Name:     "http-host",
+						Usage:    "the fully qualified domain name of the wireguardhttps server",
+						Required: true,
 					},
 					&cli.StringSliceFlag{
 						Name:  "client-dns",
@@ -69,8 +78,9 @@ func main() {
 						Usage: "listen over insecure http instead of https. not recommended for production",
 					},
 					&cli.StringFlag{
-						Name:  "templates-directory",
-						Usage: "directory containing templates for Wireguard config",
+						Name:     "templates-directory",
+						Usage:    "directory containing templates for Wireguard config",
+						Required: true,
 					},
 					&cli.StringFlag{
 						Name:  "wireguard-device",
@@ -78,8 +88,24 @@ func main() {
 						Usage: "wireguard device name as shown in network interfaces",
 					},
 					&cli.StringFlag{
-						Name:  "connection-string",
-						Usage: "postgresql database connection strings",
+						Name:     "connection-string",
+						Usage:    "postgresql database connection strings",
+						Required: true,
+					},
+					&cli.StringFlag{
+						Name:     "azure-ad-key",
+						Usage:    "azure ad client key",
+						Required: true,
+					},
+					&cli.StringFlag{
+						Name:     "azure-ad-secret",
+						Usage:    "azure ad client secret",
+						Required: true,
+					},
+					&cli.StringFlag{
+						Name:     "azure-ad-callback-url",
+						Usage:    "azure ad oauth callback url",
+						Required: true,
 					},
 				},
 				Action: actionServe,
@@ -133,13 +159,15 @@ func actionInitialize(c *cli.Context) error {
 func actionServe(c *cli.Context) error {
 	serverHostName := c.String("wireguard-host")
 	wireguardListenPort := c.Int("wireguard-listen-port")
-	if serverHostName == "" {
-		return fmt.Errorf("--wireguard-host argument is required.")
-	}
 
-	url, err := url.Parse(fmt.Sprintf("%v:%v", serverHostName, wireguardListenPort))
+	endpointURL, err := url.Parse(fmt.Sprintf("%v:%v", serverHostName, wireguardListenPort))
 	if err != nil {
 		return fmt.Errorf("--wireguard-host must be a valid URL, got %v", serverHostName)
+	}
+
+	httpHost, err := url.Parse(c.String("http-host"))
+	if err != nil {
+		return fmt.Errorf("--http-host must be a valid URL, got %v", httpHost)
 	}
 
 	dnsServers, err := stringsToIPs(c.StringSlice("client-dns"))
@@ -151,6 +179,9 @@ func actionServe(c *cli.Context) error {
 	wgRPCdAddress := c.String("wgrpcd-address")
 	wireguardDevice := c.String("wireguard-device")
 	connectionString := c.String("connection-string")
+	azureADKey := c.String("azure-ad-key")
+	azureADSecret := c.String("azure-ad-secret")
+	azureADCallbackURL := c.String("azure-ad-callback-url")
 
 	database, err := wireguardhttps.NewPostgresDatabase(connectionString)
 	if err != nil {
@@ -167,7 +198,8 @@ func actionServe(c *cli.Context) error {
 
 	config := &wireguardhttps.ServerConfig{
 		DNSServers:         dnsServers,
-		Endpoint:           url,
+		Endpoint:           endpointURL,
+		HTTPHost:           httpHost,
 		TemplatesDirectory: templatesDirectory,
 		// TODO: Refactor this to ensure invalid device names fail immediately
 		WireguardClient: &wgrpcd.Client{
@@ -175,6 +207,9 @@ func actionServe(c *cli.Context) error {
 			DeviceName:  wireguardDevice,
 		},
 		Database: database,
+		AuthProviders: []goth.Provider{
+			azuread.New(azureADKey, azureADSecret, azureADCallbackURL, nil),
+		},
 	}
 
 	prompt()
