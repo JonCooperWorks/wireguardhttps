@@ -114,7 +114,7 @@ func (pd *postgresDatabase) RegisterUser(name, email, authPlatformUserID, authPl
 		AuthPlatform:       authPlatform,
 	}
 	err := pd.db.Create(&user).Error
-	return UserProfile{}, wrapPackageError(err)
+	return user, wrapPackageError(err)
 }
 
 func (pd *postgresDatabase) GetUser(userID int) (UserProfile, error) {
