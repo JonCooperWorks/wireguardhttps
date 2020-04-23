@@ -15,6 +15,7 @@ func (wh *WireguardHandlers) oauthCallbackHandler(c *gin.Context) {
 	gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
 		// TODO: Error message
+		log.Println(err)
 		c.Status(401)
 		return
 	}
@@ -49,6 +50,7 @@ func (wh *WireguardHandlers) authenticateHandler(c *gin.Context) {
 		gothUser.Provider,
 	)
 	if err != nil {
+		log.Println(err)
 		// TODO: HTTP handler for error type.
 		c.Status(500)
 		return
@@ -58,7 +60,12 @@ func (wh *WireguardHandlers) authenticateHandler(c *gin.Context) {
 }
 
 func (wh *WireguardHandlers) logoutHandler(c *gin.Context) {
-	gothic.Logout(c.Writer, c.Request)
+	err := gothic.Logout(c.Writer, c.Request)
+	if err != nil {
+		log.Println(err)
+		c.Status(500)
+		return
+	}
 	c.Redirect(http.StatusTemporaryRedirect, "/")
 }
 
