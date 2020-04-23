@@ -208,11 +208,10 @@ func actionServe(c *cli.Context) error {
 			DeviceName:  wireguardDevice,
 		},
 		Database: database,
+		AuthProviders: []goth.Provider{
+			azuread.New(azureADKey, azureADSecret, azureADCallbackURL, nil),
+		},
 	}
-
-	goth.UseProviders(
-		azuread.New(azureADKey, azureADSecret, azureADCallbackURL, nil),
-	)
 
 	router := wireguardhttps.Router(config)
 

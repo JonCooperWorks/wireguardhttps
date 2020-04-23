@@ -2,8 +2,10 @@ package wireguardhttps
 
 import (
 	"net/http"
+	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 )
 
@@ -94,6 +96,7 @@ func (wh *WireguardHandlers) deleteDeviceHandler(c *gin.Context) {
 }
 
 func Router(config *ServerConfig) *gin.Engine {
+	goth.UseProviders(config.AuthProviders...)
 	router := gin.Default()
 	handlers := &WireguardHandlers{config: config}
 	// Authentication
