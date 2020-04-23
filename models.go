@@ -21,7 +21,7 @@ type Device struct {
 	IPAddress string    `gorm:"UNIQUE"`
 	Name      string
 	OS        string
-	Owner     UserProfile
+	Owner     UserProfile `gorm:"foreignkey:OwnerID"`
 	OwnerID   int
 	PublicKey string `gorm:"UNIQUE"`
 }
