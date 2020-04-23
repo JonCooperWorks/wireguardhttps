@@ -8,7 +8,7 @@ import (
 
 func ProviderWhitelistMiddleware(c *gin.Context) {
 	if !isAllowedProvider(c) {
-		c.AbortWithStatus(401)
+		c.AbortWithStatus(400)
 	}
 
 	c.Next()
