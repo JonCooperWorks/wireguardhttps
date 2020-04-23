@@ -1,8 +1,8 @@
 package wireguardhttps
 
 import (
-	"net/http"
 	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth"
@@ -18,7 +18,7 @@ func (wh *WireguardHandlers) oauthCallbackHandler(c *gin.Context) {
 	if err != nil {
 		// TODO: Error message
 		log.Println(err)
-		c.Status(401)
+		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
@@ -31,7 +31,7 @@ func (wh *WireguardHandlers) oauthCallbackHandler(c *gin.Context) {
 
 	if err != nil {
 		// TODO: HTTP handler for error type.
-		c.Status(500)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
@@ -54,7 +54,7 @@ func (wh *WireguardHandlers) authenticateHandler(c *gin.Context) {
 	if err != nil {
 		log.Println(err)
 		// TODO: HTTP handler for error type.
-		c.Status(500)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
@@ -65,7 +65,7 @@ func (wh *WireguardHandlers) logoutHandler(c *gin.Context) {
 	err := gothic.Logout(c.Writer, c.Request)
 	if err != nil {
 		log.Println(err)
-		c.Status(500)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	c.Redirect(http.StatusTemporaryRedirect, "/")
@@ -80,7 +80,7 @@ func (wh *WireguardHandlers) rekeyDeviceHandler(c *gin.Context) {
 }
 
 func (wh *WireguardHandlers) listUserDevicesHandler(c *gin.Context) {
-	
+
 }
 
 func (wh *WireguardHandlers) getUserDeviceHandler(c *gin.Context) {
