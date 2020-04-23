@@ -109,7 +109,6 @@ func Router(config *ServerConfig) *gin.Engine {
 
 	// Private routes
 	private := router.Group("/")
-	private.Use(AuthRequiredMiddleware)
 
 	// Devices
 	private.POST("/devices", handlers.newDeviceHandler)
