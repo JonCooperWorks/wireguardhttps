@@ -5,8 +5,8 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
-func NewSQLiteDatabase(connectionString string) (Database, error) {
-	db, err := gorm.Open("sqlite", connectionString)
+func NewSQLiteDatabase(path string) (Database, error) {
+	db, err := gorm.Open("sqlite", path)
 	if err != nil {
 		return nil, wrapPackageError(err)
 	}
