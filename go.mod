@@ -9,4 +9,5 @@ require (
 	github.com/t-tiger/gorm-bulk-insert v1.3.0
 	github.com/markbates/goth v1.64.0
 	github.com/gin-gonic/gin v1.6.2
+	github.com/gin-contrib/secure v0.0.1
 )

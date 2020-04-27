@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gin-contrib/secure"
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
@@ -29,6 +30,7 @@ func (wh *WireguardHandlers) oauthCallbackHandler(c *gin.Context) {
 	)
 
 	if err != nil {
+		log.Println(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -95,6 +97,17 @@ func (wh *WireguardHandlers) deleteDeviceHandler(c *gin.Context) {
 func Router(config *ServerConfig) *gin.Engine {
 	goth.UseProviders(config.AuthProviders...)
 	router := gin.Default()
+	router.Use(secure.New(
+		secure.Config{
+			BrowserXssFilter: true,
+			IENoOpen:         true,
+			FrameDeny:        true,
+			AllowedHosts:     []string{config.HTTPHost.Hostname()},
+			SSLRedirect:      true,
+			IsDevelopment:    config.IsDebug,
+		}),
+	)
+
 	handlers := &WireguardHandlers{config: config}
 
 	// Authentication

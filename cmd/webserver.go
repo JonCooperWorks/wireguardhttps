@@ -107,6 +107,11 @@ func main() {
 						Usage:    "azure ad oauth callback url",
 						Required: true,
 					},
+					&cli.BoolFlag{
+						Name:  "debug",
+						Value: true,
+						Usage: "run server in debug mode",
+					},
 				},
 				Action: actionServe,
 			},
@@ -211,6 +216,7 @@ func actionServe(c *cli.Context) error {
 		AuthProviders: []goth.Provider{
 			azuread.New(azureADKey, azureADSecret, azureADCallbackURL, nil),
 		},
+		IsDebug: c.Bool("debug"),
 	}
 
 	router := wireguardhttps.Router(config)

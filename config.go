@@ -16,4 +16,5 @@ type ServerConfig struct {
 	WireguardClient    *wgrpcd.Client
 	Database           Database
 	AuthProviders      []goth.Provider
+	IsDebug            bool
 }
