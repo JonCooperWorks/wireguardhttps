@@ -3,6 +3,7 @@ package wireguardhttps
 import (
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"github.com/markbates/goth"
@@ -10,10 +11,12 @@ import (
 )
 
 func TestOnlyWhitelistedAuthProvidersAccepted(t *testing.T) {
+	httpHost, _ := url.Parse("localhost")
 	config := &ServerConfig{
 		AuthProviders: []goth.Provider{
 			azuread.New("key", "secret", "localhost:80/callback", nil),
 		},
+		HTTPHost: httpHost,
 	}
 	testRouter := Router(config)
 	writer := httptest.NewRecorder()
@@ -22,6 +25,9 @@ func TestOnlyWhitelistedAuthProvidersAccepted(t *testing.T) {
 		"/auth/callback?provider=stripe",
 		"/auth/authenticate?provider=stripe",
 		"/auth/logout?provider=stripe",
+		"/auth/authenticate",
+		"/auth/logout",
+		"/auth/callback",
 	}
 	for _, url := range urls {
 		request, err := http.NewRequest("GET", url, nil)
@@ -29,9 +35,9 @@ func TestOnlyWhitelistedAuthProvidersAccepted(t *testing.T) {
 			t.Fatal(err)
 		}
 		testRouter.ServeHTTP(writer, request)
-	
+
 		if writer.Code != 400 {
-			t.Fatalf("Expected status code 400, got %v", writer.Code)
+			t.Fatalf("Expected status code 400 for %v, got %v", url, writer.Code)
 		}
 	}
 }

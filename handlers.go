@@ -167,11 +167,11 @@ func Router(config *ServerConfig) *gin.Engine {
 	handlers := &WireguardHandlers{config: config}
 
 	// Authentication
-	auth := router.Group("/")
+	auth := router.Group("/auth")
 	auth.Use(ProviderWhitelistMiddleware)
-	auth.GET("/auth/callback", handlers.oauthCallbackHandler)
-	auth.GET("/auth/authenticate", handlers.authenticateHandler)
-	auth.GET("/auth/logout", handlers.logoutHandler)
+	auth.GET("/callback", handlers.oauthCallbackHandler)
+	auth.GET("/authenticate", handlers.authenticateHandler)
+	auth.GET("logout", handlers.logoutHandler)
 
 	// Private routes
 	private := router.Group("/")
