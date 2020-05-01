@@ -23,7 +23,7 @@ func (wh *WireguardHandlers) user(c *gin.Context) UserProfile {
 		c.AbortWithStatus(http.StatusUnauthorized)
 	}
 
-	return user.(UserProfile)
+	return *user.(*UserProfile)
 }
 
 func (wh *WireguardHandlers) storeUserInSession(c *gin.Context, user UserProfile) error {
