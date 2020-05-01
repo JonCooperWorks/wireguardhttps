@@ -11,6 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
+	"github.com/gwatts/gin-adapter"
+	"github.com/justinas/nosurf"
 )
 
 type WireguardHandlers struct {
@@ -160,6 +162,7 @@ func Router(config *ServerConfig) *gin.Engine {
 			IsDevelopment:    config.IsDebug,
 		}),
 	)
+	router.Use(adapter.Wrap(nosurf.NewPure))
 
 	handlers := &WireguardHandlers{config: config}
 
