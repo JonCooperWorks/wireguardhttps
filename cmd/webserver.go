@@ -10,6 +10,7 @@ import (
 	"github.com/joncooperworks/wgrpcd"
 	"github.com/joncooperworks/wireguardhttps"
 	"github.com/markbates/goth"
+	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/azuread"
 	"github.com/urfave/cli/v2"
 )
@@ -216,7 +217,9 @@ func actionServe(c *cli.Context) error {
 		AuthProviders: []goth.Provider{
 			azuread.New(azureADKey, azureADSecret, azureADCallbackURL, nil),
 		},
-		IsDebug: c.Bool("debug"),
+		SessionStore: gothic.Store,
+		SessionName:  "wireguardhttpssession",
+		IsDebug:      c.Bool("debug"),
 	}
 
 	router := wireguardhttps.Router(config)

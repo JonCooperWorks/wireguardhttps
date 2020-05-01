@@ -4,6 +4,7 @@ import (
 	"net"
 	"net/url"
 
+	"github.com/gorilla/sessions"
 	"github.com/joncooperworks/wgrpcd"
 	"github.com/markbates/goth"
 )
@@ -17,4 +18,6 @@ type ServerConfig struct {
 	Database           Database
 	AuthProviders      []goth.Provider
 	IsDebug            bool
+	SessionStore       sessions.Store
+	SessionName        string
 }

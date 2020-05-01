@@ -6,7 +6,7 @@ import (
 )
 
 func NewSQLiteDatabase(path string) (Database, error) {
-	db, err := gorm.Open("sqlite", path)
+	db, err := gorm.Open("sqlite3", path)
 	if err != nil {
 		return nil, wrapPackageError(err)
 	}
