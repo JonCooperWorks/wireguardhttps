@@ -9,10 +9,10 @@ import (
 
 	"github.com/gin-contrib/secure"
 	"github.com/gin-gonic/gin"
-	"github.com/markbates/goth"
-	"github.com/markbates/goth/gothic"
 	"github.com/gwatts/gin-adapter"
 	"github.com/justinas/nosurf"
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/gothic"
 )
 
 type WireguardHandlers struct {
@@ -113,6 +113,7 @@ func (wh *WireguardHandlers) newDeviceHandler(c *gin.Context) {
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
+		return
 	}
 
 	// TODO: Configure from JSON body
@@ -120,10 +121,11 @@ func (wh *WireguardHandlers) newDeviceHandler(c *gin.Context) {
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
+		return
 	}
 
-	// TODO: Return generated INI template
-	c.JSON(http.StatusOK, wh.user(c))
+
+	c.JSON(http.StatusOK, credentials)
 
 }
 
@@ -162,7 +164,9 @@ func Router(config *ServerConfig) *gin.Engine {
 			IsDevelopment:    config.IsDebug,
 		}),
 	)
-	router.Use(adapter.Wrap(nosurf.NewPure))
+	if !config.IsDebug {
+		router.Use(adapter.Wrap(nosurf.NewPure))
+	}
 
 	handlers := &WireguardHandlers{config: config}
 

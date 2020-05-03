@@ -49,8 +49,7 @@ func (d *dataOperations) AllocateSubnet(addresses []net.IP) error {
 
 func (d *dataOperations) createIPAddress() (IPAddress, error) {
 	var ipAddress IPAddress
-	row := d.db.Raw("SELECT ip.address FROM ip_addresses ip WHERE NOT EXISTS (SELECT d.ip_address FROM devices d WHERE  d.ip_address = ip.address) LIMIT 1").Row()
-	err := row.Scan(&ipAddress)
+	err := d.db.Raw("SELECT * FROM ip_addresses ip WHERE NOT EXISTS (SELECT d.ip_address FROM devices d WHERE  d.ip_address = ip.address) LIMIT 1").Scan(&ipAddress).Error
 	return ipAddress, err
 }
 
