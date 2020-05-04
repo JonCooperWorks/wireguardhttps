@@ -34,7 +34,7 @@ func Router(config *ServerConfig) *gin.Engine {
 	// Authentication
 	auth := router.Group("/auth")
 	auth.Use(ProviderWhitelistMiddleware)
-	auth.GET("/callback", handlers.OauthCallbackHandler)
+	auth.GET("/callback", handlers.OAuthCallbackHandler)
 	auth.GET("/authenticate", handlers.AuthenticateHandler)
 	auth.GET("/logout", handlers.LogoutHandler)
 
