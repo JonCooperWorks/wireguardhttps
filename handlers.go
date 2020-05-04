@@ -147,12 +147,6 @@ func (wh *WireguardHandlers) newDeviceHandler(c *gin.Context) {
 			ParseFiles(filepath.Join(wh.config.TemplatesDirectory, "ini/peerconfig.tmpl")),
 	)
 
-	if err != nil {
-		log.Println(err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
 	peerConfigINI := &PeerConfigINI{
 		PublicKey:  device.PublicKey,
 		PrivateKey: credentials.PrivateKey,
