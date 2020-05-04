@@ -3,7 +3,6 @@ package wireguardhttps
 import (
 	"bytes"
 	"context"
-	"encoding/gob"
 	"fmt"
 	"log"
 	"net"
@@ -12,12 +11,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/gin-contrib/secure"
 	"github.com/gin-gonic/gin"
-	"github.com/gwatts/gin-adapter"
 	"github.com/joncooperworks/wgrpcd"
-	"github.com/justinas/nosurf"
-	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 )
 
@@ -44,7 +39,7 @@ func (wh *WireguardHandlers) storeUserInSession(c *gin.Context, user UserProfile
 	return session.Save(c.Request, c.Writer)
 }
 
-func (wh *WireguardHandlers) oauthCallbackHandler(c *gin.Context) {
+func (wh *WireguardHandlers) OauthCallbackHandler(c *gin.Context) {
 	gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
 		log.Println(err)
@@ -74,7 +69,7 @@ func (wh *WireguardHandlers) oauthCallbackHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-func (wh *WireguardHandlers) authenticateHandler(c *gin.Context) {
+func (wh *WireguardHandlers) AuthenticateHandler(c *gin.Context) {
 	gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
 		gothic.BeginAuthHandler(c.Writer, c.Request)
@@ -101,7 +96,7 @@ func (wh *WireguardHandlers) authenticateHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-func (wh *WireguardHandlers) logoutHandler(c *gin.Context) {
+func (wh *WireguardHandlers) LogoutHandler(c *gin.Context) {
 	err := gothic.Logout(c.Writer, c.Request)
 	if err != nil {
 		log.Println(err)
@@ -111,7 +106,7 @@ func (wh *WireguardHandlers) logoutHandler(c *gin.Context) {
 	c.Redirect(http.StatusTemporaryRedirect, "/")
 }
 
-func (wh *WireguardHandlers) newDeviceHandler(c *gin.Context) {
+func (wh *WireguardHandlers) NewDeviceHandler(c *gin.Context) {
 	var deviceRequest DeviceRequest
 	err := c.BindJSON(&deviceRequest)
 	if err != nil {
@@ -167,11 +162,11 @@ func (wh *WireguardHandlers) newDeviceHandler(c *gin.Context) {
 
 }
 
-func (wh *WireguardHandlers) rekeyDeviceHandler(c *gin.Context) {
+func (wh *WireguardHandlers) RekeyDeviceHandler(c *gin.Context) {
 
 }
 
-func (wh *WireguardHandlers) listUserDevicesHandler(c *gin.Context) {
+func (wh *WireguardHandlers) ListUserDevicesHandler(c *gin.Context) {
 	devices, err := wh.config.Database.Devices(wh.user(c))
 	if err != nil {
 		log.Println(err)
@@ -185,58 +180,15 @@ func (wh *WireguardHandlers) listUserDevicesHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, devices)
 }
 
-func (wh *WireguardHandlers) getUserDeviceHandler(c *gin.Context) {
+func (wh *WireguardHandlers) GetUserDeviceHandler(c *gin.Context) {
 
 }
 
-func (wh *WireguardHandlers) userProfileInfoHandler(c *gin.Context) {
+func (wh *WireguardHandlers) UserProfileInfoHandler(c *gin.Context) {
 	user := wh.user(c)
 	c.JSON(http.StatusOK, user)
 }
 
-func (wh *WireguardHandlers) deleteDeviceHandler(c *gin.Context) {
+func (wh *WireguardHandlers) DeleteDeviceHandler(c *gin.Context) {
 
-}
-
-func Router(config *ServerConfig) *gin.Engine {
-	goth.UseProviders(config.AuthProviders...)
-	gob.Register(&UserProfile{})
-	router := gin.Default()
-	router.Use(secure.New(
-		secure.Config{
-			BrowserXssFilter: true,
-			IENoOpen:         true,
-			FrameDeny:        true,
-			AllowedHosts:     []string{config.HTTPHost.Hostname()},
-			SSLRedirect:      true,
-			IsDevelopment:    config.IsDebug,
-		}),
-	)
-	if !config.IsDebug {
-		router.Use(adapter.Wrap(nosurf.NewPure))
-	}
-
-	handlers := &WireguardHandlers{config: config}
-
-	// Authentication
-	auth := router.Group("/auth")
-	auth.Use(ProviderWhitelistMiddleware)
-	auth.GET("/callback", handlers.oauthCallbackHandler)
-	auth.GET("/authenticate", handlers.authenticateHandler)
-	auth.GET("/logout", handlers.logoutHandler)
-
-	// Private routes
-	private := router.Group("/")
-	private.Use(AuthenticationRequiredMiddleware(config.SessionStore, config.SessionName))
-
-	// Devices
-	private.POST("/devices", handlers.newDeviceHandler)
-	private.POST("/devices/:device_id", handlers.rekeyDeviceHandler)
-	private.DELETE("/devices/:device_id", handlers.deleteDeviceHandler)
-	private.GET("/devices", handlers.listUserDevicesHandler)
-	private.GET("/devices/:device_id", handlers.getUserDeviceHandler)
-
-	// User Profile
-	private.GET("/me", handlers.userProfileInfoHandler)
-	return router
 }
