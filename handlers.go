@@ -134,7 +134,7 @@ func (wh *WireguardHandlers) newDeviceHandler(c *gin.Context) {
 
 		return credentials, nil
 	}
-	device, credentials, err := wh.config.Database.CreateDevice(wh.user(c), deviceRequest.Name, deviceRequest.OS, deviceFunc)
+	_, credentials, err := wh.config.Database.CreateDevice(wh.user(c), deviceRequest.Name, deviceRequest.OS, deviceFunc)
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -148,7 +148,7 @@ func (wh *WireguardHandlers) newDeviceHandler(c *gin.Context) {
 	)
 
 	peerConfigINI := &PeerConfigINI{
-		PublicKey:  device.PublicKey,
+		PublicKey:  credentials.ServerPublicKey,
 		PrivateKey: credentials.PrivateKey,
 		AllowedIPs: ipNetsToStrings(credentials.AllowedIPs),
 		Addresses:  ipNetsToStrings(credentials.AllowedIPs),
