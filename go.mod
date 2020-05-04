@@ -13,4 +13,5 @@ require (
 	github.com/markbates/goth v1.64.0
 	github.com/t-tiger/gorm-bulk-insert v1.3.0
 	github.com/urfave/cli/v2 v2.2.0
+	golang.zx2c4.com/wireguard/wgctrl v0.0.0-20200324154536-ceff61240acf
 )

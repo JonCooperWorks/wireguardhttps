@@ -12,7 +12,7 @@ type Database interface {
 	Initialize() error
 	AllocateSubnet(addresses []net.IP) error
 	CreateDevice(owner UserProfile, name, os string, deviceFunc DeviceFunc) (Device, *wgrpcd.PeerConfigInfo, error)
-	RekeyDevice(owner UserProfile, device Device, deviceFunc DeviceFunc) (Device, *wgrpcd.PeerConfigInfo, error)
+	RekeyDevice(owner UserProfile, device Device, rekeyFunc RekeyFunc) (Device, *wgrpcd.PeerConfigInfo, error)
 	Devices(owner UserProfile) ([]Device, error)
 	Device(owner UserProfile, deviceID int) (Device, error)
 	RemoveDevice(owner UserProfile, device Device) error
@@ -22,9 +22,12 @@ type Database interface {
 	Close() error
 }
 
-// DeviceFunc creates a device on the Wireguard database and returns an error on failure.
+// DeviceFunc creates a device on the Wireguard interface and returns an error on failure.
 // This allows us to take advantage of SQL transactions.
 type DeviceFunc func(IPAddress) (*wgrpcd.PeerConfigInfo, error)
+
+// RekeyFunc rekeys a device on the Wireguard interface.
+type RekeyFunc func() (*wgrpcd.PeerConfigInfo, error)
 
 // RecordNotFoundError is our package specific not found error.
 // Database implementations should return this when they can't find a record, so the caller can handle this case without knowing about the underlying database.

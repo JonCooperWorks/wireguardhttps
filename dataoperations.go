@@ -85,8 +85,24 @@ func (d *dataOperations) CreateDevice(owner UserProfile, name, os string, device
 	return device, credentials, wrapPackageError(err)
 }
 
-func (d *dataOperations) RekeyDevice(owner UserProfile, device Device, deviceFunc DeviceFunc) (Device, *wgrpcd.PeerConfigInfo, error) {
-	return Device{}, nil, nil
+func (d *dataOperations) RekeyDevice(owner UserProfile, device Device, rekeyFunc RekeyFunc) (Device, *wgrpcd.PeerConfigInfo, error) {
+	var credentials *wgrpcd.PeerConfigInfo
+	err := d.db.Transaction(func(db *gorm.DB) error {
+		var err error
+		credentials, err = rekeyFunc()
+		if err != nil {
+			return err
+		}
+
+		device.PublicKey = credentials.PublicKey
+		err = db.Save(&device).Error
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	return device, credentials, wrapPackageError(err)
 }
 
 func (d *dataOperations) Devices(owner UserProfile) ([]Device, error) {
@@ -97,7 +113,7 @@ func (d *dataOperations) Devices(owner UserProfile) ([]Device, error) {
 
 func (d *dataOperations) Device(owner UserProfile, deviceID int) (Device, error) {
 	var device Device
-	err := d.db.First(device, deviceID).Where("owner = ?", owner.ID).Error
+	err := d.db.First(&device, deviceID).Where("owner = ?", owner.ID).Error
 	return device, wrapPackageError(err)
 }
 
