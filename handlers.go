@@ -39,7 +39,7 @@ func (wh *WireguardHandlers) storeUserInSession(c *gin.Context, user UserProfile
 	return session.Save(c.Request, c.Writer)
 }
 
-func (wh *WireguardHandlers) OauthCallbackHandler(c *gin.Context) {
+func (wh *WireguardHandlers) OAuthCallbackHandler(c *gin.Context) {
 	gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
 		log.Println(err)
