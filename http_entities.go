@@ -11,11 +11,11 @@ type DeviceRequest struct{
 	OS string `json:"os"`
 }
 
-type DeviceConfigINI struct{
-	PrivateKey string
+type PeerConfigINI struct{
 	PublicKey string
-	Addresses []net.IP
-	DNSAddresses []net.IP
-	AllowedIPs []net.IP
-	Endpoint *url.URL
+	PrivateKey string
+	AllowedIPs []string
+	Addresses []string
+	DNSServers []string
+	ServerName string
 }
