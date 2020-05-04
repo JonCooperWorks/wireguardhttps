@@ -1,15 +1,21 @@
 package wireguardhttps
 
 import (
+	"bytes"
 	"context"
 	"encoding/gob"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
+	"path/filepath"
+	"strings"
+	"text/template"
 
 	"github.com/gin-contrib/secure"
 	"github.com/gin-gonic/gin"
 	"github.com/gwatts/gin-adapter"
+	"github.com/joncooperworks/wgrpcd"
 	"github.com/justinas/nosurf"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
@@ -106,26 +112,64 @@ func (wh *WireguardHandlers) logoutHandler(c *gin.Context) {
 }
 
 func (wh *WireguardHandlers) newDeviceHandler(c *gin.Context) {
+	var deviceRequest DeviceRequest
+	err := c.BindJSON(&deviceRequest)
+	if err != nil {
+		log.Println(err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
 	client := wh.config.WireguardClient
-	// TODO: Set to assigned device IP
-	_, network, _ := net.ParseCIDR("10.0.0.0/24")
-	credentials, err := client.CreatePeer(context.Background(), []net.IPNet{*network})
+	deviceFunc := func (ipAddress IPAddress) (*wgrpcd.PeerConfigInfo, error) {
+		_, network, err := net.ParseCIDR(fmt.Sprintf("%v/32", ipAddress.Address))
+		if err != nil {
+			return nil, err
+		}
+
+		credentials, err := client.CreatePeer(context.Background(), []net.IPNet{*network})
+		if err != nil {
+			return nil, err
+		}
+
+		return credentials, nil
+	}
+	device, credentials, err := wh.config.Database.CreateDevice(wh.user(c), deviceRequest.Name, deviceRequest.OS, deviceFunc)
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	// TODO: Configure from JSON body
-	_, err = wh.config.Database.CreateDevice(wh.user(c), "Macbook", "macOS", credentials.PublicKey)
+	tmpl := template.Must(
+		template.New("peerconfig.tmpl").
+				Funcs(map[string]interface{}{"StringsJoin": strings.Join}).
+				ParseFiles(filepath.Join(wh.config.TemplatesDirectory, "ini/peerconfig.tmpl")),
+	)		
+	
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
+	peerConfigINI := &PeerConfigINI{
+		PublicKey: device.PublicKey,
+		PrivateKey: credentials.PrivateKey,
+		AllowedIPs: ipNetsToStrings(credentials.AllowedIPs),
+		Addresses: ipNetsToStrings(credentials.AllowedIPs),
+		ServerName: wh.config.Endpoint.String(),
+		DNSServers: ipsToStrings(wh.config.DNSServers),
+	}
+	buffer := &bytes.Buffer{}
+	err = tmpl.Execute(buffer, peerConfigINI)
+	if err != nil {
+		log.Println(err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
-	c.JSON(http.StatusOK, credentials)
+	c.Data(http.StatusOK, "text/plain", buffer.Bytes())
 
 }
 

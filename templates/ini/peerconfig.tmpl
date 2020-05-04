@@ -1,9 +1,9 @@
 [Interface]
 PrivateKey = {{ .PrivateKey }}
-Address = {{ StringsJoin .Addresses ", " }}
-DNS = {{ StringsJoin .DNSs ", " }}
+Address = {{ StringsJoin .AllowedIPs ", " }}
+DNS = {{ StringsJoin .DNSServers ", " }}
 
 [Peer]
 PublicKey = {{ .PublicKey }}
 AllowedIPs = {{ StringsJoin .AllowedIPs ", " }}
-Endpoint = {{ .ServerName }}:{{ .ListenPort }}
+Endpoint = {{ .ServerName }}

@@ -4,6 +4,7 @@ import (
 	"net"
 
 	"github.com/jinzhu/gorm"
+	"github.com/joncooperworks/wgrpcd"
 	gormbulk "github.com/t-tiger/gorm-bulk-insert"
 )
 
@@ -53,10 +54,16 @@ func (d *dataOperations) createIPAddress() (IPAddress, error) {
 	return ipAddress, err
 }
 
-func (d *dataOperations) CreateDevice(owner UserProfile, name, os, publicKey string) (Device, error) {
+func (d *dataOperations) CreateDevice(owner UserProfile, name, os string, deviceFunc DeviceFunc) (Device, *wgrpcd.PeerConfigInfo, error) {
 	var device Device
+	var credentials *wgrpcd.PeerConfigInfo
 	err := d.db.Transaction(func(db *gorm.DB) error {
 		ipAddress, err := d.createIPAddress()
+		if err != nil {
+			return err
+		}
+
+		credentials, err = deviceFunc(ipAddress)
 		if err != nil {
 			return err
 		}
@@ -64,20 +71,21 @@ func (d *dataOperations) CreateDevice(owner UserProfile, name, os, publicKey str
 		device = Device{
 			Name:      name,
 			OS:        os,
-			PublicKey: publicKey,
+			PublicKey: credentials.PublicKey,
 			IPAddress: ipAddress.Address,
 		}
 		err = d.db.Create(&device).Error
 		if err != nil {
 			return err
 		}
+
 		return nil
 	})
-	return device, wrapPackageError(err)
+	return device, credentials, wrapPackageError(err)
 }
 
-func (d *dataOperations) RekeyDevice(owner UserProfile, publicKey string, device Device) (Device, error) {
-	return Device{}, nil
+func (d *dataOperations) RekeyDevice(owner UserProfile, device Device, deviceFunc DeviceFunc) (Device, *wgrpcd.PeerConfigInfo, error) {
+	return Device{}, nil, nil
 }
 
 func (d *dataOperations) Devices(owner UserProfile) ([]Device, error) {
