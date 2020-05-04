@@ -121,7 +121,7 @@ func (wh *WireguardHandlers) newDeviceHandler(c *gin.Context) {
 	}
 
 	client := wh.config.WireguardClient
-	deviceFunc := func (ipAddress IPAddress) (*wgrpcd.PeerConfigInfo, error) {
+	deviceFunc := func(ipAddress IPAddress) (*wgrpcd.PeerConfigInfo, error) {
 		_, network, err := net.ParseCIDR(fmt.Sprintf("%v/32", ipAddress.Address))
 		if err != nil {
 			return nil, err
@@ -143,10 +143,10 @@ func (wh *WireguardHandlers) newDeviceHandler(c *gin.Context) {
 
 	tmpl := template.Must(
 		template.New("peerconfig.tmpl").
-				Funcs(map[string]interface{}{"StringsJoin": strings.Join}).
-				ParseFiles(filepath.Join(wh.config.TemplatesDirectory, "ini/peerconfig.tmpl")),
-	)		
-	
+			Funcs(map[string]interface{}{"StringsJoin": strings.Join}).
+			ParseFiles(filepath.Join(wh.config.TemplatesDirectory, "ini/peerconfig.tmpl")),
+	)
+
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -154,10 +154,10 @@ func (wh *WireguardHandlers) newDeviceHandler(c *gin.Context) {
 	}
 
 	peerConfigINI := &PeerConfigINI{
-		PublicKey: device.PublicKey,
+		PublicKey:  device.PublicKey,
 		PrivateKey: credentials.PrivateKey,
 		AllowedIPs: ipNetsToStrings(credentials.AllowedIPs),
-		Addresses: ipNetsToStrings(credentials.AllowedIPs),
+		Addresses:  ipNetsToStrings(credentials.AllowedIPs),
 		ServerName: wh.config.Endpoint.String(),
 		DNSServers: ipsToStrings(wh.config.DNSServers),
 	}
@@ -178,7 +178,17 @@ func (wh *WireguardHandlers) rekeyDeviceHandler(c *gin.Context) {
 }
 
 func (wh *WireguardHandlers) listUserDevicesHandler(c *gin.Context) {
+	devices, err := wh.config.Database.Devices(wh.user(c))
+	if err != nil {
+		log.Println(err)
+		if _, ok := err.(*RecordNotFoundError); ok {
+			c.AbortWithStatus(http.StatusNotFound)
+		}
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
+	c.JSON(http.StatusOK, devices)
 }
 
 func (wh *WireguardHandlers) getUserDeviceHandler(c *gin.Context) {

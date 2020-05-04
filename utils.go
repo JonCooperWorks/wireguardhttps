@@ -4,7 +4,6 @@ import (
 	"net"
 )
 
-
 func ipNetsToStrings(nets []net.IPNet) []string {
 	rv := []string{}
 	for _, n := range nets {

@@ -73,6 +73,7 @@ func (d *dataOperations) CreateDevice(owner UserProfile, name, os string, device
 			OS:        os,
 			PublicKey: credentials.PublicKey,
 			IPAddress: ipAddress.Address,
+			Owner:     owner,
 		}
 		err = d.db.Create(&device).Error
 		if err != nil {
