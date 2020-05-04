@@ -223,7 +223,7 @@ func Router(config *ServerConfig) *gin.Engine {
 	auth.Use(ProviderWhitelistMiddleware)
 	auth.GET("/callback", handlers.oauthCallbackHandler)
 	auth.GET("/authenticate", handlers.authenticateHandler)
-	auth.GET("logout", handlers.logoutHandler)
+	auth.GET("/logout", handlers.logoutHandler)
 
 	// Private routes
 	private := router.Group("/")
