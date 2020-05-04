@@ -159,7 +159,7 @@ func (wh *WireguardHandlers) NewDeviceHandler(c *gin.Context) {
 	}
 
 	c.Data(http.StatusOK, "text/plain", buffer.Bytes())
-
+	buffer.Reset()
 }
 
 func (wh *WireguardHandlers) RekeyDeviceHandler(c *gin.Context) {
