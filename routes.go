@@ -47,7 +47,6 @@ func Router(config *ServerConfig) *gin.Engine {
 	private.POST("/devices/:device_id", handlers.RekeyDeviceHandler)
 	private.DELETE("/devices/:device_id", handlers.DeleteDeviceHandler)
 	private.GET("/devices", handlers.ListUserDevicesHandler)
-	private.GET("/devices/:device_id", handlers.GetUserDeviceHandler)
 
 	// User Profile
 	private.GET("/me", handlers.UserProfileInfoHandler)

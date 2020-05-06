@@ -1,6 +1,7 @@
 package wireguardhttps
 
 import (
+	"fmt"
 	"net"
 
 	"github.com/jinzhu/gorm"
@@ -85,11 +86,11 @@ func (d *dataOperations) CreateDevice(owner UserProfile, name, os string, device
 	return device, credentials, wrapPackageError(err)
 }
 
-func (d *dataOperations) RekeyDevice(owner UserProfile, device Device, rekeyFunc RekeyFunc) (Device, *wgrpcd.PeerConfigInfo, error) {
+func (d *dataOperations) RekeyDevice(owner UserProfile, device Device, rekeyFunc DeviceFunc) (Device, *wgrpcd.PeerConfigInfo, error) {
 	var credentials *wgrpcd.PeerConfigInfo
 	err := d.db.Transaction(func(db *gorm.DB) error {
 		var err error
-		credentials, err = rekeyFunc()
+		credentials, err = rekeyFunc(device.IP)
 		if err != nil {
 			return err
 		}
@@ -117,8 +118,19 @@ func (d *dataOperations) Device(owner UserProfile, deviceID int) (Device, error)
 	return device, wrapPackageError(err)
 }
 
-func (d *dataOperations) RemoveDevice(owner UserProfile, device Device) error {
-	return nil
+func (d *dataOperations) RemoveDevice(owner UserProfile, device Device, deleteFunc DeleteFunc) error {
+	err := deleteFunc()
+	if err != nil {
+		return err
+	}
+
+	if device.Owner.ID != owner.ID {
+		return &RecordNotFoundError{
+			err: fmt.Errorf("device does not belong to user %v", owner),
+		}
+	}
+
+	return d.db.Delete(&device).Error
 }
 
 func (d *dataOperations) RegisterUser(name, email, authPlatformUserID, authPlatform string) (UserProfile, error) {

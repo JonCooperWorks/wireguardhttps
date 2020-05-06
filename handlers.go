@@ -24,10 +24,10 @@ type WireguardHandlers struct {
 
 func (wh *WireguardHandlers) respondToError(c *gin.Context, err error) {
 	log.Println(err)
-		if _, ok := err.(*RecordNotFoundError); ok {
-			c.AbortWithStatus(http.StatusNotFound)
-		}
-		c.AbortWithStatus(http.StatusInternalServerError)
+	if _, ok := err.(*RecordNotFoundError); ok {
+		c.AbortWithStatus(http.StatusNotFound)
+	}
+	c.AbortWithStatus(http.StatusInternalServerError)
 }
 
 func (wh *WireguardHandlers) user(c *gin.Context) UserProfile {
@@ -189,8 +189,8 @@ func (wh *WireguardHandlers) RekeyDeviceHandler(c *gin.Context) {
 	}
 
 	client := wh.config.WireguardClient
-	rekeyFunc := func() (*wgrpcd.PeerConfigInfo, error) {
-		_, network, err := net.ParseCIDR(fmt.Sprintf("%v/32", device.IPAddress))
+	rekeyFunc := func(ipAddress IPAddress) (*wgrpcd.PeerConfigInfo, error) {
+		_, network, err := net.ParseCIDR(fmt.Sprintf("%v/32", ipAddress))
 		if err != nil {
 			return nil, err
 		}
@@ -249,15 +249,41 @@ func (wh *WireguardHandlers) ListUserDevicesHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, devices)
 }
 
-func (wh *WireguardHandlers) GetUserDeviceHandler(c *gin.Context) {
-
-}
-
 func (wh *WireguardHandlers) UserProfileInfoHandler(c *gin.Context) {
 	user := wh.user(c)
 	c.JSON(http.StatusOK, user)
 }
 
 func (wh *WireguardHandlers) DeleteDeviceHandler(c *gin.Context) {
+	user := wh.user(c)
+	deviceID, err := strconv.Atoi(c.Param("device_id"))
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
 
+	device, err := wh.config.Database.Device(user, deviceID)
+	if err != nil {
+		wh.respondToError(c, err)
+		return
+	}
+
+	client := wh.config.WireguardClient
+	deleteFunc := func() error {
+		publicKey, err := wgtypes.ParseKey(device.PublicKey)
+		if err != nil {
+			return err
+		}
+		_, err = client.RemovePeer(context.Background(), publicKey)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+	err = wh.config.Database.RemoveDevice(wh.user(c), device, deleteFunc)
+	if err != nil {
+		wh.respondToError(c, err)
+		return
+	}
 }
