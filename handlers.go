@@ -19,7 +19,7 @@ import (
 )
 
 type WireguardHandlers struct {
-	config *ServerConfig
+	*ServerConfig
 }
 
 func (wh *WireguardHandlers) respondToError(c *gin.Context, err error) {
@@ -40,8 +40,8 @@ func (wh *WireguardHandlers) user(c *gin.Context) UserProfile {
 }
 
 func (wh *WireguardHandlers) storeUserInSession(c *gin.Context, user UserProfile) error {
-	store := wh.config.SessionStore
-	session, err := store.Get(c.Request, wh.config.SessionName)
+	store := wh.SessionStore
+	session, err := store.Get(c.Request, wh.SessionName)
 	if err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func (wh *WireguardHandlers) OAuthCallbackHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := wh.config.Database.RegisterUser(
+	user, err := wh.Database.RegisterUser(
 		gothUser.Name,
 		gothUser.Email,
 		gothUser.UserID,
@@ -87,7 +87,7 @@ func (wh *WireguardHandlers) AuthenticateHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := wh.config.Database.RegisterUser(
+	user, err := wh.Database.RegisterUser(
 		gothUser.Name,
 		gothUser.Email,
 		gothUser.UserID,
@@ -127,21 +127,20 @@ func (wh *WireguardHandlers) NewDeviceHandler(c *gin.Context) {
 		return
 	}
 
-	client := wh.config.WireguardClient
 	deviceFunc := func(ipAddress IPAddress) (*wgrpcd.PeerConfigInfo, error) {
 		_, network, err := net.ParseCIDR(fmt.Sprintf("%v/32", ipAddress.Address))
 		if err != nil {
 			return nil, err
 		}
 
-		credentials, err := client.CreatePeer(context.Background(), []net.IPNet{*network})
+		credentials, err := wh.WireguardClient.CreatePeer(context.Background(), []net.IPNet{*network})
 		if err != nil {
 			return nil, err
 		}
 
 		return credentials, nil
 	}
-	_, credentials, err := wh.config.Database.CreateDevice(wh.user(c), deviceRequest.Name, deviceRequest.OS, deviceFunc)
+	_, credentials, err := wh.Database.CreateDevice(wh.user(c), deviceRequest.Name, deviceRequest.OS, deviceFunc)
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -151,7 +150,7 @@ func (wh *WireguardHandlers) NewDeviceHandler(c *gin.Context) {
 	tmpl := template.Must(
 		template.New("peerconfig.tmpl").
 			Funcs(map[string]interface{}{"StringsJoin": strings.Join}).
-			ParseFiles(filepath.Join(wh.config.TemplatesDirectory, "ini/peerconfig.tmpl")),
+			ParseFiles(filepath.Join(wh.TemplatesDirectory, "ini/peerconfig.tmpl")),
 	)
 
 	peerConfigINI := &PeerConfigINI{
@@ -159,8 +158,8 @@ func (wh *WireguardHandlers) NewDeviceHandler(c *gin.Context) {
 		PrivateKey: credentials.PrivateKey,
 		AllowedIPs: ipNetsToStrings(credentials.AllowedIPs),
 		Addresses:  ipNetsToStrings(credentials.AllowedIPs),
-		ServerName: wh.config.Endpoint.String(),
-		DNSServers: ipsToStrings(wh.config.DNSServers),
+		ServerName: wh.Endpoint.String(),
+		DNSServers: ipsToStrings(wh.DNSServers),
 	}
 	buffer := &bytes.Buffer{}
 	err = tmpl.Execute(buffer, peerConfigINI)
@@ -182,13 +181,12 @@ func (wh *WireguardHandlers) RekeyDeviceHandler(c *gin.Context) {
 		return
 	}
 
-	device, err := wh.config.Database.Device(user, deviceID)
+	device, err := wh.Database.Device(user, deviceID)
 	if err != nil {
 		wh.respondToError(c, err)
 		return
 	}
 
-	client := wh.config.WireguardClient
 	rekeyFunc := func(ipAddress IPAddress) (*wgrpcd.PeerConfigInfo, error) {
 		_, network, err := net.ParseCIDR(fmt.Sprintf("%v/32", ipAddress))
 		if err != nil {
@@ -199,14 +197,14 @@ func (wh *WireguardHandlers) RekeyDeviceHandler(c *gin.Context) {
 		if err != nil {
 			return nil, err
 		}
-		credentials, err := client.RekeyPeer(context.Background(), publicKey, []net.IPNet{*network})
+		credentials, err := wh.WireguardClient.RekeyPeer(context.Background(), publicKey, []net.IPNet{*network})
 		if err != nil {
 			return nil, err
 		}
 
 		return credentials, nil
 	}
-	_, credentials, err := wh.config.Database.RekeyDevice(wh.user(c), device, rekeyFunc)
+	_, credentials, err := wh.Database.RekeyDevice(wh.user(c), device, rekeyFunc)
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -216,7 +214,7 @@ func (wh *WireguardHandlers) RekeyDeviceHandler(c *gin.Context) {
 	tmpl := template.Must(
 		template.New("peerconfig.tmpl").
 			Funcs(map[string]interface{}{"StringsJoin": strings.Join}).
-			ParseFiles(filepath.Join(wh.config.TemplatesDirectory, "ini/peerconfig.tmpl")),
+			ParseFiles(filepath.Join(wh.TemplatesDirectory, "ini/peerconfig.tmpl")),
 	)
 
 	peerConfigINI := &PeerConfigINI{
@@ -224,8 +222,8 @@ func (wh *WireguardHandlers) RekeyDeviceHandler(c *gin.Context) {
 		PrivateKey: credentials.PrivateKey,
 		AllowedIPs: ipNetsToStrings(credentials.AllowedIPs),
 		Addresses:  ipNetsToStrings(credentials.AllowedIPs),
-		ServerName: wh.config.Endpoint.String(),
-		DNSServers: ipsToStrings(wh.config.DNSServers),
+		ServerName: wh.Endpoint.String(),
+		DNSServers: ipsToStrings(wh.DNSServers),
 	}
 	buffer := &bytes.Buffer{}
 	err = tmpl.Execute(buffer, peerConfigINI)
@@ -240,7 +238,7 @@ func (wh *WireguardHandlers) RekeyDeviceHandler(c *gin.Context) {
 }
 
 func (wh *WireguardHandlers) ListUserDevicesHandler(c *gin.Context) {
-	devices, err := wh.config.Database.Devices(wh.user(c))
+	devices, err := wh.Database.Devices(wh.user(c))
 	if err != nil {
 		wh.respondToError(c, err)
 		return
@@ -262,26 +260,25 @@ func (wh *WireguardHandlers) DeleteDeviceHandler(c *gin.Context) {
 		return
 	}
 
-	device, err := wh.config.Database.Device(user, deviceID)
+	device, err := wh.Database.Device(user, deviceID)
 	if err != nil {
 		wh.respondToError(c, err)
 		return
 	}
 
-	client := wh.config.WireguardClient
 	deleteFunc := func() error {
 		publicKey, err := wgtypes.ParseKey(device.PublicKey)
 		if err != nil {
 			return err
 		}
-		_, err = client.RemovePeer(context.Background(), publicKey)
+		_, err = wh.WireguardClient.RemovePeer(context.Background(), publicKey)
 		if err != nil {
 			return err
 		}
 
 		return nil
 	}
-	err = wh.config.Database.RemoveDevice(wh.user(c), device, deleteFunc)
+	err = wh.Database.RemoveDevice(wh.user(c), device, deleteFunc)
 	if err != nil {
 		wh.respondToError(c, err)
 		return

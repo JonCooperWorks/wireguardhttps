@@ -3,13 +3,12 @@ package wireguardhttps
 import (
 	"encoding/gob"
 
-	"github.com/markbates/goth"
 	"github.com/gin-contrib/secure"
-	"github.com/gwatts/gin-adapter"
-	"github.com/justinas/nosurf"
 	"github.com/gin-gonic/gin"
+	adapter "github.com/gwatts/gin-adapter"
+	"github.com/justinas/nosurf"
+	"github.com/markbates/goth"
 )
-
 
 func Router(config *ServerConfig) *gin.Engine {
 	goth.UseProviders(config.AuthProviders...)
@@ -29,7 +28,7 @@ func Router(config *ServerConfig) *gin.Engine {
 		router.Use(adapter.Wrap(nosurf.NewPure))
 	}
 
-	handlers := &WireguardHandlers{config: config}
+	handlers := &WireguardHandlers{ServerConfig: config}
 
 	// Authentication
 	auth := router.Group("/auth")
