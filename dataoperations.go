@@ -130,7 +130,7 @@ func (d *dataOperations) RemoveDevice(owner UserProfile, device Device, deleteFu
 		}
 	}
 
-	return d.db.Delete(&device).Error
+	return wrapPackageError(d.db.Delete(&device).Error)
 }
 
 func (d *dataOperations) RegisterUser(name, email, authPlatformUserID, authPlatform string) (UserProfile, error) {
