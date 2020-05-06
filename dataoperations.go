@@ -25,7 +25,7 @@ func wrapPackageError(err error) error {
 }
 
 func (d *dataOperations) Initialize() error {
-	return wrapPackageError(d.db.AutoMigrate(&UserProfile{}, &Device{}, IPAddress{}).Error)
+	return wrapPackageError(d.db.AutoMigrate(&UserProfile{}, &Device{}, &IPAddress{}).Error)
 }
 
 func (d *dataOperations) Close() error {
