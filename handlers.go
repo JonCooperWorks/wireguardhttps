@@ -286,4 +286,6 @@ func (wh *WireguardHandlers) DeleteDeviceHandler(c *gin.Context) {
 		wh.respondToError(c, err)
 		return
 	}
+
+	c.AbortWithStatus(http.StatusNoContent)
 }
