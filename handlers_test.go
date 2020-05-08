@@ -71,7 +71,6 @@ func TestAuthenticatedURLsFailWithoutSession(t *testing.T) {
 		testRouter.ServeHTTP(writer, request)
 
 		if writer.Code != 401 {
-			t.Errorf(writer.Header().Get("Location"))
 			t.Fatalf("Expected status code 401 for %v, got %v", url, writer.Code)
 		}
 	}
