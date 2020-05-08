@@ -114,7 +114,7 @@ func (d *dataOperations) Devices(owner UserProfile) ([]Device, error) {
 
 func (d *dataOperations) Device(owner UserProfile, deviceID int) (Device, error) {
 	var device Device
-	err := d.db.First(&device, deviceID).Where("owner = ?", owner.ID).Error
+	err := d.db.Preload("IP").Preload("Owner").First(&device, deviceID).Where("owner = ?", owner.ID).Error
 	return device, wrapPackageError(err)
 }
 
