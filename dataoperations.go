@@ -51,7 +51,9 @@ func (d *dataOperations) AllocateSubnet(addresses []net.IP) error {
 
 func (d *dataOperations) createIPAddress() (IPAddress, error) {
 	var ipAddress IPAddress
-	err := d.db.Raw("SELECT * FROM ip_addresses ip WHERE NOT EXISTS (SELECT d.ip_address FROM devices d WHERE  d.ip_address = ip.address) LIMIT 1").Scan(&ipAddress).Error
+	err := d.db.Raw("SELECT * FROM ip_addresses ip WHERE NOT EXISTS (SELECT d.ip_address FROM devices d WHERE  d.ip_address = ip.address) LIMIT 1").
+		Scan(&ipAddress).
+		Error
 	return ipAddress, err
 }
 
@@ -76,7 +78,8 @@ func (d *dataOperations) CreateDevice(owner UserProfile, name, os string, device
 			IPAddress: ipAddress.Address,
 			Owner:     owner,
 		}
-		err = d.db.Create(&device).Error
+		err = d.db.Create(&device).
+			Error
 		if err != nil {
 			return err
 		}
@@ -96,7 +99,8 @@ func (d *dataOperations) RekeyDevice(owner UserProfile, device Device, rekeyFunc
 		}
 
 		device.PublicKey = credentials.PublicKey
-		err = db.Save(&device).Error
+		err = db.Save(&device).
+			Error
 		if err != nil {
 			return err
 		}
@@ -108,13 +112,19 @@ func (d *dataOperations) RekeyDevice(owner UserProfile, device Device, rekeyFunc
 
 func (d *dataOperations) Devices(owner UserProfile) ([]Device, error) {
 	var devices []Device
-	err := d.db.Find(&devices).Where("owner = ?", owner.ID).Error
+	err := d.db.Find(&devices).
+		Where("owner = ?", owner.ID).
+		Error
 	return devices, wrapPackageError(err)
 }
 
 func (d *dataOperations) Device(owner UserProfile, deviceID int) (Device, error) {
 	var device Device
-	err := d.db.Preload("IP").Preload("Owner").First(&device, deviceID).Where("owner = ?", owner.ID).Error
+	err := d.db.Preload("IP").
+		Preload("Owner").
+		First(&device, deviceID).
+		Where("owner = ?", owner.ID).
+		Error
 	return device, wrapPackageError(err)
 }
 
@@ -140,13 +150,15 @@ func (d *dataOperations) RegisterUser(name, email, authPlatformUserID, authPlatf
 		AuthPlatformUserID: authPlatformUserID,
 		AuthPlatform:       authPlatform,
 	}
-	err := d.db.FirstOrCreate(&user).Error
+	err := d.db.FirstOrCreate(&user).
+		Error
 	return user, wrapPackageError(err)
 }
 
 func (d *dataOperations) GetUser(userID int) (UserProfile, error) {
 	var user UserProfile
-	err := d.db.First(user, userID).Error
+	err := d.db.First(user, userID).
+		Error
 	return user, wrapPackageError(err)
 }
 
