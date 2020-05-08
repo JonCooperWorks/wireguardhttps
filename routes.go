@@ -20,7 +20,7 @@ func Router(config *ServerConfig) *gin.Engine {
 			IENoOpen:         true,
 			FrameDeny:        true,
 			AllowedHosts:     []string{config.HTTPHost.Hostname()},
-			SSLRedirect:      true,
+			SSLRedirect:      !config.IsDebug,
 			IsDevelopment:    config.IsDebug,
 		}),
 	)

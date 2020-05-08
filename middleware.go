@@ -12,6 +12,7 @@ import (
 func ProviderWhitelistMiddleware(c *gin.Context) {
 	if !isAllowedProvider(c) {
 		c.AbortWithStatus(http.StatusBadRequest)
+		return
 	}
 
 	c.Next()
@@ -34,11 +35,13 @@ func AuthenticationRequiredMiddleware(store sessions.Store, sessionName string) 
 		session, err := store.Get(c.Request, sessionName)
 		if err != nil {
 			c.AbortWithStatus(http.StatusInternalServerError)
+			return
 		}
 
 		user, ok := session.Values["user"]
 		if !ok {
 			c.AbortWithStatus(http.StatusUnauthorized)
+			return
 		}
 
 		c.Set("user", user)
