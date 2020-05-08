@@ -166,6 +166,7 @@ func (wh *WireguardHandlers) NewDeviceHandler(c *gin.Context) {
 		return
 	}
 
+	c.Header("Cache-Control", "no-cache")
 	c.Data(http.StatusOK, "text/plain", buffer.Bytes())
 	buffer.Reset()
 }
@@ -185,7 +186,7 @@ func (wh *WireguardHandlers) RekeyDeviceHandler(c *gin.Context) {
 	}
 
 	rekeyFunc := func(ipAddress IPAddress) (*wgrpcd.PeerConfigInfo, error) {
-		_, network, err := net.ParseCIDR(fmt.Sprintf("%v/32", ipAddress))
+		_, network, err := net.ParseCIDR(fmt.Sprintf("%v/32", ipAddress.Address))
 		if err != nil {
 			return nil, err
 		}
@@ -230,6 +231,7 @@ func (wh *WireguardHandlers) RekeyDeviceHandler(c *gin.Context) {
 		return
 	}
 
+	c.Header("Cache-Control", "no-cache")
 	c.Data(http.StatusOK, "text/plain", buffer.Bytes())
 	buffer.Reset()
 }
