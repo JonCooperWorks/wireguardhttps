@@ -135,15 +135,15 @@ func (d *dataOperations) Device(owner UserProfile, deviceID int) (Device, error)
 }
 
 func (d *dataOperations) RemoveDevice(owner UserProfile, device Device, deleteFunc DeleteFunc) error {
-	err := deleteFunc()
-	if err != nil {
-		return err
-	}
-
 	if device.Owner.ID != owner.ID {
 		return &RecordNotFoundError{
 			err: fmt.Errorf("device does not belong to user %v", owner),
 		}
+	}
+
+	err := deleteFunc()
+	if err != nil {
+		return err
 	}
 
 	return wrapPackageError(d.db.Delete(&device).Error)
