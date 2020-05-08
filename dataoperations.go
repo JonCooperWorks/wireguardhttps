@@ -90,6 +90,12 @@ func (d *dataOperations) CreateDevice(owner UserProfile, name, os string, device
 }
 
 func (d *dataOperations) RekeyDevice(owner UserProfile, device Device, rekeyFunc DeviceFunc) (Device, *wgrpcd.PeerConfigInfo, error) {
+	if device.Owner.ID != owner.ID {
+		return Device{}, nil, &RecordNotFoundError{
+			err: fmt.Errorf("device does not belong to user %v", owner),
+		}
+	}
+
 	var credentials *wgrpcd.PeerConfigInfo
 	err := d.db.Transaction(func(db *gorm.DB) error {
 		var err error
