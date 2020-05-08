@@ -24,6 +24,7 @@ func Router(config *ServerConfig) *gin.Engine {
 			AllowedHosts:          []string{config.HTTPHost.Hostname()},
 			SSLRedirect:           !config.IsDebug,
 			IsDevelopment:         config.IsDebug,
+			SSLProxyHeaders:       map[string]string{"X-Forwarded-Proto": "https"},
 		}),
 	)
 	if !config.IsDebug {
