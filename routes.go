@@ -16,12 +16,14 @@ func Router(config *ServerConfig) *gin.Engine {
 	router := gin.Default()
 	router.Use(secure.New(
 		secure.Config{
-			BrowserXssFilter: true,
-			IENoOpen:         true,
-			FrameDeny:        true,
-			AllowedHosts:     []string{config.HTTPHost.Hostname()},
-			SSLRedirect:      !config.IsDebug,
-			IsDevelopment:    config.IsDebug,
+			BrowserXssFilter:      true,
+			IENoOpen:              true,
+			FrameDeny:             true,
+			ContentSecurityPolicy: "default-src 'self'",
+			ContentTypeNosniff:    true,
+			AllowedHosts:          []string{config.HTTPHost.Hostname()},
+			SSLRedirect:           !config.IsDebug,
+			IsDevelopment:         config.IsDebug,
 		}),
 	)
 	if !config.IsDebug {

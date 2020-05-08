@@ -1,11 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
 	"net/url"
 	"os"
+	"path/filepath"
+	"strings"
+	"text/template"
 
 	"github.com/joncooperworks/wgrpcd"
 	"github.com/joncooperworks/wireguardhttps"
@@ -110,8 +114,13 @@ func main() {
 					},
 					&cli.BoolFlag{
 						Name:  "debug",
-						Value: true,
+						Value: false,
 						Usage: "run server in debug mode",
+					},
+					&cli.StringFlag{
+						Name:  "api-session-name",
+						Value: "wireguardhttpssession",
+						Usage: "session cookie name. you can change this to mess with pentesters and automatic scanners.",
 					},
 				},
 				Action: actionServe,
@@ -201,24 +210,39 @@ func actionServe(c *cli.Context) error {
 		return err
 	}
 
+	wireguardClient := &wgrpcd.Client{
+		GrpcAddress: wgRPCdAddress,
+		DeviceName:  wireguardDevice,
+	}
+
+	devices, err := wireguardClient.Devices(context.Background())
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Found wireguard devices: %v", strings.Join(devices, ", "))
+
 	// TODO: Check if IP addresses have been allocated in the database before running the program
 
+	templates := map[string]*template.Template{
+		"peer_config": template.Must(
+			template.New("peerconfig.tmpl").
+				Funcs(map[string]interface{}{"StringsJoin": strings.Join}).
+				ParseFiles(filepath.Join(templatesDirectory, "ini/peerconfig.tmpl")),
+		),
+	}
 	config := &wireguardhttps.ServerConfig{
-		DNSServers:         dnsServers,
-		Endpoint:           endpointURL,
-		HTTPHost:           httpHost,
-		TemplatesDirectory: templatesDirectory,
-		// TODO: Refactor this to ensure invalid device names fail immediately
-		WireguardClient: &wgrpcd.Client{
-			GrpcAddress: wgRPCdAddress,
-			DeviceName:  wireguardDevice,
-		},
-		Database: database,
+		DNSServers:      dnsServers,
+		Endpoint:        endpointURL,
+		HTTPHost:        httpHost,
+		Templates:       templates,
+		WireguardClient: wireguardClient,
+		Database:        database,
 		AuthProviders: []goth.Provider{
 			azuread.New(azureADKey, azureADSecret, azureADCallbackURL, nil),
 		},
 		SessionStore: gothic.Store,
-		SessionName:  "wireguardhttpssession",
+		SessionName:  c.String("api-session-name"),
 		IsDebug:      c.Bool("debug"),
 	}
 

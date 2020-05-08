@@ -7,10 +7,7 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"path/filepath"
 	"strconv"
-	"strings"
-	"text/template"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joncooperworks/wgrpcd"
@@ -147,11 +144,11 @@ func (wh *WireguardHandlers) NewDeviceHandler(c *gin.Context) {
 		return
 	}
 
-	tmpl := template.Must(
-		template.New("peerconfig.tmpl").
-			Funcs(map[string]interface{}{"StringsJoin": strings.Join}).
-			ParseFiles(filepath.Join(wh.TemplatesDirectory, "ini/peerconfig.tmpl")),
-	)
+	tmpl, ok := wh.Templates["peer_config"]
+	if !ok {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	peerConfigINI := &PeerConfigINI{
 		PublicKey:  credentials.ServerPublicKey,
@@ -211,11 +208,11 @@ func (wh *WireguardHandlers) RekeyDeviceHandler(c *gin.Context) {
 		return
 	}
 
-	tmpl := template.Must(
-		template.New("peerconfig.tmpl").
-			Funcs(map[string]interface{}{"StringsJoin": strings.Join}).
-			ParseFiles(filepath.Join(wh.TemplatesDirectory, "ini/peerconfig.tmpl")),
-	)
+	tmpl, ok := wh.Templates["peer_config"]
+	if !ok {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	peerConfigINI := &PeerConfigINI{
 		PublicKey:  credentials.ServerPublicKey,
