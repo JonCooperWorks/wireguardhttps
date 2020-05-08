@@ -72,7 +72,7 @@ func TestAuthenticatedURLsFailWithoutSession(t *testing.T) {
 
 		if writer.Code != 401 {
 			t.Errorf(writer.Header().Get("Location"))
-			t.Fatalf("Expected status code 400 for %v, got %v", url, writer.Code)
+			t.Fatalf("Expected status code 401 for %v, got %v", url, writer.Code)
 		}
 	}
 }
