@@ -156,10 +156,10 @@ func (wh *WireguardHandlers) NewDeviceHandler(c *gin.Context) {
 	peerConfigINI := &PeerConfigINI{
 		PublicKey:  credentials.ServerPublicKey,
 		PrivateKey: credentials.PrivateKey,
-		AllowedIPs: ipNetsToStrings(credentials.AllowedIPs),
-		Addresses:  ipNetsToStrings(credentials.AllowedIPs),
+		AllowedIPs: wgrpcd.IPNetsToStrings(credentials.AllowedIPs),
+		Addresses:  wgrpcd.IPNetsToStrings(credentials.AllowedIPs),
 		ServerName: wh.Endpoint.String(),
-		DNSServers: ipsToStrings(wh.DNSServers),
+		DNSServers: wgrpcd.IPsToStrings(wh.DNSServers),
 	}
 	buffer := &bytes.Buffer{}
 	err = tmpl.Execute(buffer, peerConfigINI)
@@ -220,10 +220,10 @@ func (wh *WireguardHandlers) RekeyDeviceHandler(c *gin.Context) {
 	peerConfigINI := &PeerConfigINI{
 		PublicKey:  credentials.ServerPublicKey,
 		PrivateKey: credentials.PrivateKey,
-		AllowedIPs: ipNetsToStrings(credentials.AllowedIPs),
-		Addresses:  ipNetsToStrings(credentials.AllowedIPs),
+		AllowedIPs: wgrpcd.IPNetsToStrings(credentials.AllowedIPs),
+		Addresses:  wgrpcd.IPNetsToStrings(credentials.AllowedIPs),
 		ServerName: wh.Endpoint.String(),
-		DNSServers: ipsToStrings(wh.DNSServers),
+		DNSServers: wgrpcd.IPsToStrings(wh.DNSServers),
 	}
 	buffer := &bytes.Buffer{}
 	err = tmpl.Execute(buffer, peerConfigINI)

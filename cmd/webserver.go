@@ -176,7 +176,7 @@ func actionServe(c *cli.Context) error {
 		return fmt.Errorf("--http-host must be a valid URL, got %v", httpHost)
 	}
 
-	dnsServers, err := stringsToIPs(c.StringSlice("client-dns"))
+	dnsServers, err := wgrpcd.StringsToIPs(c.StringSlice("client-dns"))
 	if err != nil {
 		return fmt.Errorf("--client-dns must be valid IP addresses. %v", err)
 	}
@@ -227,16 +227,4 @@ func actionServe(c *cli.Context) error {
 	prompt()
 	log.Println(config)
 	return router.Run(listenAddr)
-}
-
-func stringsToIPs(rawIPs []string) ([]net.IP, error) {
-	ips := []net.IP{}
-	for _, rawIP := range rawIPs {
-		ip := net.ParseIP(rawIP)
-		if ip == nil {
-			return []net.IP{}, fmt.Errorf("%v is not a valid IP address", ip)
-		}
-		ips = append(ips, ip)
-	}
-	return ips, nil
 }
