@@ -30,8 +30,6 @@ type Device struct {
 // We maintain as little information as possible about users to make this application a less attractive target to hackers.
 type UserProfile struct {
 	gorm.Model
-	Name               string
-	Email              string `gorm:"UNIQUE"`
 	AuthPlatformUserID string `gorm:"UNIQUE;PRIMARY_KEY"`
 	AuthPlatform       string
 }

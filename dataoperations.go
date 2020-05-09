@@ -140,7 +140,7 @@ func (d *dataOperations) RemoveDevice(owner UserProfile, device Device, deleteFu
 	return wrapPackageError(err)
 }
 
-func (d *dataOperations) RegisterUser(name, email, authPlatformUserID, authPlatform string) (UserProfile, error) {
+func (d *dataOperations) RegisterUser(authPlatformUserID, authPlatform string) (UserProfile, error) {
 	user := UserProfile{
 		AuthPlatformUserID: authPlatformUserID,
 		AuthPlatform:       authPlatform,

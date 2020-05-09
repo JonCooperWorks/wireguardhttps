@@ -56,8 +56,6 @@ func (wh *WireguardHandlers) OAuthCallbackHandler(c *gin.Context) {
 	}
 
 	user, err := wh.Database.RegisterUser(
-		gothUser.Name,
-		gothUser.Email,
 		gothUser.UserID,
 		gothUser.Provider,
 	)
@@ -86,8 +84,6 @@ func (wh *WireguardHandlers) AuthenticateHandler(c *gin.Context) {
 	}
 
 	user, err := wh.Database.RegisterUser(
-		gothUser.Name,
-		gothUser.Email,
 		gothUser.UserID,
 		gothUser.Provider,
 	)
