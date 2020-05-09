@@ -111,8 +111,10 @@ func (d *dataOperations) RekeyDevice(owner UserProfile, device Device, rekeyFunc
 
 func (d *dataOperations) Devices(owner UserProfile) ([]Device, error) {
 	var devices []Device
-	err := d.db.Find(&devices).
-		Where("owner = ?", owner.ID).
+	err := d.db.Preload("IP").
+		Preload("Owner").
+		Where("owner_id = ?", owner.ID).
+		Find(&devices).
 		Error
 	return devices, wrapPackageError(err)
 }
@@ -121,8 +123,8 @@ func (d *dataOperations) Device(owner UserProfile, deviceID int) (Device, error)
 	var device Device
 	err := d.db.Preload("IP").
 		Preload("Owner").
+		Where("owner_id = ?", owner.ID).
 		First(&device, deviceID).
-		Where("owner = ?", owner.ID).
 		Error
 	return device, wrapPackageError(err)
 }
@@ -133,17 +135,17 @@ func (d *dataOperations) RemoveDevice(owner UserProfile, device Device, deleteFu
 		return err
 	}
 
-	return wrapPackageError(d.db.Delete(&device).Error)
+	err = d.db.Where("owner_id = ?", owner.ID).
+		Delete(&device).Error
+	return wrapPackageError(err)
 }
 
 func (d *dataOperations) RegisterUser(name, email, authPlatformUserID, authPlatform string) (UserProfile, error) {
 	user := UserProfile{
-		Name:               name,
-		Email:              email,
 		AuthPlatformUserID: authPlatformUserID,
 		AuthPlatform:       authPlatform,
 	}
-	err := d.db.FirstOrCreate(&user).
+	err := d.db.FirstOrCreate(&user, UserProfile{AuthPlatformUserID: authPlatformUserID}).
 		Error
 	return user, wrapPackageError(err)
 }

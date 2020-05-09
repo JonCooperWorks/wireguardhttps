@@ -23,6 +23,7 @@ func (wh *WireguardHandlers) respondToError(c *gin.Context, err error) {
 	log.Println(err)
 	if _, ok := err.(*RecordNotFoundError); ok {
 		c.AbortWithStatus(http.StatusNotFound)
+		return
 	}
 	c.AbortWithStatus(http.StatusInternalServerError)
 }
