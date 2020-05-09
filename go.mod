@@ -8,7 +8,7 @@ require (
 	github.com/gorilla/sessions v1.1.1
 	github.com/gwatts/gin-adapter v0.0.0-20170508204228-c44433c485ad
 	github.com/jinzhu/gorm v1.9.12
-	github.com/joncooperworks/wgrpcd v0.0.0-20200508134438-30fd151477c9
+	github.com/joncooperworks/wgrpcd v0.0.0-20200508215915-9484f7fbd8a5
 	github.com/justinas/nosurf v1.1.0
 	github.com/markbates/goth v1.64.0
 	github.com/t-tiger/gorm-bulk-insert v1.3.0
