@@ -167,7 +167,8 @@ func actionInitialize(c *cli.Context) error {
 		return err
 	}
 
-	log.Printf("Allocated %v addresses in %v\n", len(addresses), network)
+	// We don't allocate the network or broadcast addresses.
+	log.Printf("Allocated %v addresses in %v\n", len(addresses)-2, network)
 	return nil
 }
 
