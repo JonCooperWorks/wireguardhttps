@@ -122,6 +122,10 @@ func main() {
 						Value: "wireguardhttpssession",
 						Usage: "session cookie name. you can change this to mess with pentesters and automatic scanners.",
 					},
+					&cli.StringFlag{
+						Name:  "csrf-token-key",
+						Usage: "key for signing CSRF tokens. keep as safe as the session key.",
+					},
 				},
 				Action: actionServe,
 			},
@@ -232,6 +236,14 @@ func actionServe(c *cli.Context) error {
 				ParseFiles(filepath.Join(templatesDirectory, "ini/peerconfig.tmpl")),
 		),
 	}
+
+	debugMode := c.Bool("debug")
+
+	csrfSessionKey := []byte(c.String("csrf-session-key"))
+	if !debugMode && len(csrfSessionKey) != 32 {
+		return fmt.Errorf("CSRF session key must be 32 bytes")
+	}
+
 	config := &wireguardhttps.ServerConfig{
 		DNSServers:      dnsServers,
 		Endpoint:        endpointURL,
@@ -244,7 +256,8 @@ func actionServe(c *cli.Context) error {
 		},
 		SessionStore: gothic.Store,
 		SessionName:  c.String("api-session-name"),
-		IsDebug:      c.Bool("debug"),
+		IsDebug:      debugMode,
+		CSRFKey:      csrfSessionKey,
 	}
 
 	router := wireguardhttps.Router(config)
