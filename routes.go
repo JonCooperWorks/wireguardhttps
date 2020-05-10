@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-contrib/secure"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/csrf"
 	adapter "github.com/gwatts/gin-adapter"
-	"github.com/justinas/nosurf"
 	"github.com/markbates/goth"
 )
 
@@ -28,7 +28,8 @@ func Router(config *ServerConfig) *gin.Engine {
 		}),
 	)
 	if !config.IsDebug {
-		router.Use(adapter.Wrap(nosurf.NewPure))
+		csrfMiddleware := csrf.Protect(config.CSRFKey)
+		router.Use(adapter.Wrap(csrfMiddleware))
 	}
 
 	handlers := &WireguardHandlers{ServerConfig: config}

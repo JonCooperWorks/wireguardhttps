@@ -21,4 +21,5 @@ type ServerConfig struct {
 	IsDebug         bool
 	SessionStore    sessions.Store
 	SessionName     string
+	CSRFKey         []byte
 }

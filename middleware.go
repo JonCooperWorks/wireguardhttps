@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
@@ -45,6 +46,7 @@ func AuthenticationRequiredMiddleware(store sessions.Store, sessionName string) 
 		}
 
 		c.Set("user", user)
+		c.Header("X-CSRF-Token", csrf.Token(c.Request))
 		c.Next()
 	}
 }
