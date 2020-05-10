@@ -23,6 +23,7 @@ func (wh *WireguardHandlers) respondToError(c *gin.Context, err error) {
 	log.Println(err)
 	if _, ok := err.(*RecordNotFoundError); ok {
 		c.AbortWithStatus(http.StatusNotFound)
+		return
 	}
 	c.AbortWithStatus(http.StatusInternalServerError)
 }
@@ -55,8 +56,6 @@ func (wh *WireguardHandlers) OAuthCallbackHandler(c *gin.Context) {
 	}
 
 	user, err := wh.Database.RegisterUser(
-		gothUser.Name,
-		gothUser.Email,
 		gothUser.UserID,
 		gothUser.Provider,
 	)
@@ -85,8 +84,6 @@ func (wh *WireguardHandlers) AuthenticateHandler(c *gin.Context) {
 	}
 
 	user, err := wh.Database.RegisterUser(
-		gothUser.Name,
-		gothUser.Email,
 		gothUser.UserID,
 		gothUser.Provider,
 	)

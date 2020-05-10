@@ -16,7 +16,7 @@ type Database interface {
 	Devices(owner UserProfile) ([]Device, error)
 	Device(owner UserProfile, deviceID int) (Device, error)
 	RemoveDevice(owner UserProfile, device Device, deleteFunc DeleteFunc) error
-	RegisterUser(name, email, authPlatformUserID, authPlatform string) (UserProfile, error)
+	RegisterUser(authPlatformUserID, authPlatform string) (UserProfile, error)
 	GetUser(userID int) (UserProfile, error)
 	DeleteUser(userID int) error
 	Close() error

@@ -17,11 +17,11 @@ type IPAddress struct {
 // Each device must have a unique IP address and public key, and we use the UNIQUE SQL constraint to enforce this.
 type Device struct {
 	gorm.Model
-	IP        IPAddress `gorm:"foreignkey:IPAddress"`
+	IP        IPAddress `gorm:"foreignkey:IPAddress;auto_preload"`
 	IPAddress string    `gorm:"UNIQUE"`
 	Name      string
 	OS        string
-	Owner     UserProfile `gorm:"foreignkey:OwnerID"`
+	Owner     UserProfile `gorm:"foreignkey:OwnerID;auto_preload"`
 	OwnerID   int
 	PublicKey string `gorm:"UNIQUE"`
 }
@@ -30,8 +30,6 @@ type Device struct {
 // We maintain as little information as possible about users to make this application a less attractive target to hackers.
 type UserProfile struct {
 	gorm.Model
-	Name               string
-	Email              string `gorm:"UNIQUE"`
-	AuthPlatformUserID string `gorm:"UNIQUE"`
+	AuthPlatformUserID string `gorm:"UNIQUE;PRIMARY_KEY"`
 	AuthPlatform       string
 }

@@ -36,7 +36,7 @@ func main() {
 					},
 					&cli.StringFlag{
 						Name:     "connection-string",
-						Usage:    "postgresql database connection strings",
+						Usage:    "postgresql database connection string",
 						Required: true,
 					},
 				},
