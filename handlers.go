@@ -120,7 +120,7 @@ func (wh *WireguardHandlers) NewDeviceHandler(c *gin.Context) {
 	err := c.BindJSON(&deviceRequest)
 	if err != nil {
 		log.Println(err)
-		c.AbortWithStatus(http.StatusInternalServerError)
+		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
