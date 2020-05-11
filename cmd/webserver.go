@@ -11,6 +11,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/gin-gonic/autotls"
 	"github.com/joncooperworks/wgrpcd"
 	"github.com/joncooperworks/wireguardhttps"
 	"github.com/markbates/goth"
@@ -264,5 +265,10 @@ func actionServe(c *cli.Context) error {
 
 	prompt()
 	log.Println(config)
-	return router.Run(listenAddr)
+
+	if config.IsDebug {
+		return router.Run(listenAddr)
+	}
+
+	return autotls.Run(router, httpHost.String())
 }
