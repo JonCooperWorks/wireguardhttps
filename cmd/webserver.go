@@ -12,6 +12,7 @@ import (
 	"text/template"
 
 	"github.com/gin-gonic/autotls"
+	"github.com/gin-gonic/gin"
 	"github.com/joncooperworks/wgrpcd"
 	"github.com/joncooperworks/wireguardhttps"
 	"github.com/markbates/goth"
@@ -239,6 +240,11 @@ func actionServe(c *cli.Context) error {
 	}
 
 	debugMode := c.Bool("debug")
+
+	// Prevent running gin in debug mode by accident
+	if !debugMode {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	csrfSessionKey := []byte(c.String("csrf-session-key"))
 	if !debugMode && len(csrfSessionKey) != 32 {
