@@ -5,5 +5,5 @@ DNS = {{ StringsJoin .DNSServers ", " }}
 
 [Peer]
 PublicKey = {{ .PublicKey }}
-AllowedIPs = {{ StringsJoin .AllowedIPs ", " }}
+AllowedIPs = 0.0.0.0/0, ::/0
 Endpoint = {{ .ServerName }}
