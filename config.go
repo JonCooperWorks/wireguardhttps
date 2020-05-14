@@ -15,7 +15,7 @@ type ServerConfig struct {
 	Endpoint        *url.URL
 	HTTPHost        *url.URL
 	Templates       map[string]*template.Template
-	WireguardClient *wgrpcd.Client
+	WireguardClient wgrpcd.Client
 	Database        Database
 	AuthProviders   []goth.Provider
 	IsDebug         bool

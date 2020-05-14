@@ -217,11 +217,12 @@ func actionServe(c *cli.Context) error {
 		return err
 	}
 
-	wireguardClient := &wgrpcd.Client{
+	wireguardClient := &wgrpcd.GRPCClient{
 		GrpcAddress: wgRPCdAddress,
 		DeviceName:  wireguardDevice,
 	}
 
+	// TODO: Validate device name
 	devices, err := wireguardClient.Devices(context.Background())
 	if err != nil {
 		return err
