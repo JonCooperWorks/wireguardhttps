@@ -125,7 +125,7 @@ func main() {
 						Usage: "session cookie name. you can change this to mess with pentesters and automatic scanners.",
 					},
 					&cli.StringFlag{
-						Name:  "csrf-token-key",
+						Name:  "csrf-session-key",
 						Usage: "key for signing CSRF tokens. keep as safe as the session key.",
 					},
 				},
@@ -249,7 +249,7 @@ func actionServe(c *cli.Context) error {
 
 	csrfSessionKey := []byte(c.String("csrf-session-key"))
 	if !debugMode && len(csrfSessionKey) != 32 {
-		return fmt.Errorf("CSRF session key must be 32 bytes")
+		return fmt.Errorf("CSRF session key must be 32 bytes, got %v", len(csrfSessionKey))
 	}
 
 	config := &wireguardhttps.ServerConfig{
