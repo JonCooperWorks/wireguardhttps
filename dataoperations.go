@@ -31,6 +31,15 @@ func (d *dataOperations) Close() error {
 	return wrapPackageError(d.db.Close())
 }
 
+func (d *dataOperations) Addresses() ([]IPAddress, error) {
+	var addresses []IPAddress
+	err := d.db.
+		Find(&addresses).
+		Error
+
+	return addresses, wrapPackageError(err)
+}
+
 func (d *dataOperations) AllocateSubnet(addresses []net.IP) error {
 	var databaseInput []interface{}
 	// Don't allocate broadcast or network address.

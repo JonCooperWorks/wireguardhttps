@@ -238,11 +238,19 @@ func actionServe(c *cli.Context) error {
 		return err
 	}
 
+	addresses, err := database.Addresses()
+	if err != nil {
+		return err
+	}
+
+	if len(addresses) == 0 {
+		return fmt.Errorf("allocate a subnet first with initialize")
+	}
+
 	if !checkWireguardDevice(wireguardDevice, devices) {
 		return fmt.Errorf("%v is not a Wireguard device. Found %v", wireguardDevice, devices)
 	}
 
-	// TODO: Check if IP addresses have been allocated in the database before running the program
 	templates := map[string]*template.Template{
 		"peer_config": template.Must(
 			template.New("peerconfig.tmpl").

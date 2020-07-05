@@ -10,6 +10,7 @@ import (
 // Implementations of Database should ensure all errors are wrapped in the appropriate wireguardhttps error type.
 type Database interface {
 	Initialize() error
+	Addresses() ([]IPAddress, error)
 	AllocateSubnet(addresses []net.IP) error
 	CreateDevice(owner UserProfile, name, os string, deviceFunc DeviceFunc) (Device, *wgrpcd.PeerConfigInfo, error)
 	RekeyDevice(owner UserProfile, device Device, deviceFunc DeviceFunc) (Device, *wgrpcd.PeerConfigInfo, error)
