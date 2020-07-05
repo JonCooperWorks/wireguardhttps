@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/autotls"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/sessions"
 	"github.com/joncooperworks/wgrpcd"
 	"github.com/joncooperworks/wireguardhttps"
 	"github.com/markbates/goth"
@@ -251,6 +252,13 @@ func actionServe(c *cli.Context) error {
 	if !debugMode && len(csrfSessionKey) != 32 {
 		return fmt.Errorf("CSRF session key must be 32 bytes, got %v", len(csrfSessionKey))
 	}
+
+	store := sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
+	store.MaxAge(86400 * 30)
+	store.Options.Path = "/"
+	store.Options.HttpOnly = false
+	store.Options.Secure = !debugMode
+	gothic.Store = store
 
 	config := &wireguardhttps.ServerConfig{
 		DNSServers:      dnsServers,
