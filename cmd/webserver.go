@@ -146,6 +146,16 @@ func prompt() {
 	log.Println("This software has not been audited.\nVulnerabilities in this can compromise your server and user data.\nDo not run this in production")
 }
 
+func checkWireguardDevice(wireguardDevice string, foundDevices []string) bool {
+	for _, device := range foundDevices {
+		if wireguardDevice == device {
+			return true
+		}
+	}
+
+	return false
+}
+
 func actionInitialize(c *cli.Context) error {
 	subnet := c.String("subnet")
 	_, network, err := net.ParseCIDR(subnet)
@@ -223,16 +233,18 @@ func actionServe(c *cli.Context) error {
 		DeviceName:  wireguardDevice,
 	}
 
-	// TODO: Validate device name
 	devices, err := wireguardClient.Devices(context.Background())
 	if err != nil {
 		return err
 	}
 
+	if !checkWireguardDevice(wireguardDevice, devices) {
+		return fmt.Errorf("%v is not a Wireguard device. Found %v", wireguardDevice, devices)
+	}
+
 	log.Printf("Found wireguard devices: %v", strings.Join(devices, ", "))
 
 	// TODO: Check if IP addresses have been allocated in the database before running the program
-
 	templates := map[string]*template.Template{
 		"peer_config": template.Must(
 			template.New("peerconfig.tmpl").
