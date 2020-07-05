@@ -271,7 +271,6 @@ func actionServe(c *cli.Context) error {
 	router := wireguardhttps.Router(config)
 
 	prompt()
-	log.Println(config)
 
 	if config.IsDebug {
 		return router.Run(listenAddr)
