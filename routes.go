@@ -21,9 +21,9 @@ func Router(config *ServerConfig) *gin.Engine {
 			FrameDeny:             true,
 			ContentSecurityPolicy: "default-src 'self'",
 			ContentTypeNosniff:    true,
-			AllowedHosts:          []string{config.HTTPHost.Hostname()},
 			SSLRedirect:           !config.IsDebug,
 			IsDevelopment:         config.IsDebug,
+			AllowedHosts:          []string{config.HTTPHost.String()},
 			SSLProxyHeaders:       map[string]string{"X-Forwarded-Proto": "https"},
 		}),
 	)
