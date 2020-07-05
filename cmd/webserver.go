@@ -242,8 +242,6 @@ func actionServe(c *cli.Context) error {
 		return fmt.Errorf("%v is not a Wireguard device. Found %v", wireguardDevice, devices)
 	}
 
-	log.Printf("Found wireguard devices: %v", strings.Join(devices, ", "))
-
 	// TODO: Check if IP addresses have been allocated in the database before running the program
 	templates := map[string]*template.Template{
 		"peer_config": template.Must(
