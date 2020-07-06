@@ -22,4 +22,5 @@ type ServerConfig struct {
 	SessionStore    sessions.Store
 	SessionName     string
 	CSRFKey         []byte
+	ADTenantName    string
 }

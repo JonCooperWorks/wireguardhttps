@@ -129,6 +129,11 @@ func main() {
 						Name:  "csrf-session-key",
 						Usage: "key for signing CSRF tokens. keep as safe as the session key.",
 					},
+					&cli.StringFlag{
+						Name:     "ad-tenant",
+						Usage:    "ad tenant name",
+						Required: true,
+					},
 				},
 				Action: actionServe,
 			},
@@ -292,6 +297,7 @@ func actionServe(c *cli.Context) error {
 		SessionName:  c.String("api-session-name"),
 		IsDebug:      debugMode,
 		CSRFKey:      csrfSessionKey,
+		ADTenantName: c.String("ad-tenant"),
 	}
 
 	router := wireguardhttps.Router(config)
