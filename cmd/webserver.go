@@ -18,7 +18,7 @@ import (
 	"github.com/joncooperworks/wireguardhttps"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
-	"github.com/markbates/goth/providers/microsoftonline"
+	"github.com/markbates/goth/providers/azuread"
 	"github.com/urfave/cli/v2"
 )
 
@@ -286,7 +286,7 @@ func actionServe(c *cli.Context) error {
 		WireguardClient: wireguardClient,
 		Database:        database,
 		AuthProviders: []goth.Provider{
-			microsoftonline.New(azureADKey, azureADSecret, azureADCallbackURL),
+			azuread.New(azureADKey, azureADSecret, azureADCallbackURL, nil),
 		},
 		SessionStore: gothic.Store,
 		SessionName:  c.String("api-session-name"),
