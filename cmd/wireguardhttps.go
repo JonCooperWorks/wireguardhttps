@@ -315,5 +315,5 @@ func actionServe(c *cli.Context) error {
 		return router.Run(listenAddr)
 	}
 
-	return autotls.Run(router, httpHost.String())
+	return autotls.Run(router, httpHost.String(), "www."+httpHost.String())
 }
