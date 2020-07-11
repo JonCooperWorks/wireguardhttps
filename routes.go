@@ -30,8 +30,7 @@ func Router(config *ServerConfig) *gin.Engine {
 	)
 
 	// JavaScript SPA frontend
-	frontend := router.Group("/")
-	frontend.Use(static.Serve("/", static.LocalFile(config.StaticAssetsDir, false)))
+	router.Use(static.Serve("/", static.LocalFile(config.StaticAssetsDir, true)))
 
 	handlers := &WireguardHandlers{ServerConfig: config}
 
