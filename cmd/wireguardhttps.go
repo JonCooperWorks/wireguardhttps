@@ -19,7 +19,7 @@ import (
 	"github.com/joncooperworks/wireguardhttps"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
-	"github.com/markbates/goth/providers/azuread"
+	"github.com/markbates/goth/providers/azureadv2"
 	"github.com/urfave/cli/v2"
 )
 
@@ -303,13 +303,12 @@ func actionServe(c *cli.Context) error {
 		WireguardClient: wireguardClient,
 		Database:        database,
 		AuthProviders: []goth.Provider{
-			azuread.New(azureADKey, azureADSecret, azureADCallbackURL, nil),
+			azureadv2.New(azureADKey, azureADSecret, azureADCallbackURL, azureadv2.ProviderOptions{Tenant: azureadv2.TenantType(c.String("ad-tenant"))}),
 		},
 		SessionStore:    gothic.Store,
 		SessionName:     c.String("api-session-name"),
 		IsDebug:         debugMode,
 		CSRFKey:         csrfSessionKey,
-		ADTenantName:    c.String("ad-tenant"),
 		StaticAssetsDir: c.String("static-assets-dir"),
 	}
 

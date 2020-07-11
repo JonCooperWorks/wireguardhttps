@@ -8,7 +8,6 @@ import (
 	"net"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joncooperworks/wgrpcd"
@@ -80,17 +79,7 @@ func (wh *WireguardHandlers) OAuthCallbackHandler(c *gin.Context) {
 func (wh *WireguardHandlers) AuthenticateHandler(c *gin.Context) {
 	gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
-		// Patch in single tenant support
-		url, err := gothic.GetAuthURL(c.Writer, c.Request)
-		if err != nil {
-			log.Println(err)
-			c.AbortWithStatus(http.StatusInternalServerError)
-			return
-		}
-
-		url = strings.Replace(url, "common", wh.ADTenantName, -1)
-		c.Redirect(http.StatusTemporaryRedirect, url)
-		return
+		gothic.BeginAuthHandler(c.Writer, c.Request)
 	}
 
 	user, err := wh.Database.RegisterUser(
