@@ -135,6 +135,11 @@ func main() {
 						Usage:    "ad tenant name",
 						Required: true,
 					},
+					&cli.StringFlag{
+						Name:     "session-secret",
+						Usage:    "cookie signing key",
+						Required: true,
+					},
 				},
 				Action: actionServe,
 			},
@@ -277,7 +282,7 @@ func actionServe(c *cli.Context) error {
 		return fmt.Errorf("CSRF session key must be 32 bytes, got %v", len(csrfSessionKey))
 	}
 
-	store := sessions.NewFilesystemStore(os.TempDir(), []byte(os.Getenv("SESSION_SECRET")))
+	store := sessions.NewFilesystemStore(os.TempDir(), []byte(c.String("session-secret")))
 	store.MaxAge(86400 * 30)
 	store.Options.Path = "/"
 	store.Options.HttpOnly = false

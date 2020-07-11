@@ -27,10 +27,6 @@ func Router(config *ServerConfig) *gin.Engine {
 			SSLProxyHeaders:       map[string]string{"X-Forwarded-Proto": "https"},
 		}),
 	)
-	if !config.IsDebug {
-		csrfMiddleware := csrf.Protect(config.CSRFKey)
-		router.Use(adapter.Wrap(csrfMiddleware))
-	}
 
 	handlers := &WireguardHandlers{ServerConfig: config}
 
@@ -45,6 +41,10 @@ func Router(config *ServerConfig) *gin.Engine {
 	private := router.Group("/")
 	private.Use(AuthenticationRequiredMiddleware(config.SessionStore, config.SessionName))
 
+	if !config.IsDebug {
+		csrfMiddleware := csrf.Protect(config.CSRFKey)
+		private.Use(adapter.Wrap(csrfMiddleware))
+	}
 	// Devices
 	private.POST("/devices", handlers.NewDeviceHandler)
 	private.POST("/devices/:device_id", handlers.RekeyDeviceHandler)
