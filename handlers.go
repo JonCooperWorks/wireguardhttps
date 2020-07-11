@@ -173,7 +173,7 @@ func (wh *WireguardHandlers) NewDeviceHandler(c *gin.Context) {
 		return
 	}
 
-	c.Header("Cache-Control", "no-cache")
+	c.Header("Cache-Control", "no-store")
 	c.Data(http.StatusOK, "text/plain", buffer.Bytes())
 	buffer.Reset()
 }
@@ -238,7 +238,7 @@ func (wh *WireguardHandlers) RekeyDeviceHandler(c *gin.Context) {
 		return
 	}
 
-	c.Header("Cache-Control", "no-cache")
+	c.Header("Cache-Control", "no-store")
 	c.Data(http.StatusOK, "text/plain", buffer.Bytes())
 	buffer.Reset()
 }
