@@ -140,6 +140,11 @@ func main() {
 						Usage:    "cookie signing key",
 						Required: true,
 					},
+					&cli.StringFlag{
+						Name:     "static-assets-dir",
+						Usage:    "frontend js app",
+						Required: true,
+					},
 				},
 				Action: actionServe,
 			},
@@ -300,11 +305,12 @@ func actionServe(c *cli.Context) error {
 		AuthProviders: []goth.Provider{
 			azuread.New(azureADKey, azureADSecret, azureADCallbackURL, nil),
 		},
-		SessionStore: gothic.Store,
-		SessionName:  c.String("api-session-name"),
-		IsDebug:      debugMode,
-		CSRFKey:      csrfSessionKey,
-		ADTenantName: c.String("ad-tenant"),
+		SessionStore:    gothic.Store,
+		SessionName:     c.String("api-session-name"),
+		IsDebug:         debugMode,
+		CSRFKey:         csrfSessionKey,
+		ADTenantName:    c.String("ad-tenant"),
+		StaticAssetsDir: c.String("static-assets-dir"),
 	}
 
 	router := wireguardhttps.Router(config)

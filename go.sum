@@ -24,6 +24,7 @@ github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZm
 github.com/eapache/go-resiliency v1.1.0/go.mod h1:kFI+JgMyC7bLPUVY133qvEBtVayf5mFgVsvEsIPBvNs=
 github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21/go.mod h1:+020luEh2TKB4/GOp8oxxtq0Daoen/Cii55CzbTV6DU=
 github.com/eapache/queue v1.1.0/go.mod h1:6eCeP0CKFpHLu8blIFXhExK/dRa7WDZfr6jVFPTqq+I=
+github.com/elazarl/go-bindata-assetfs v1.0.0/go.mod h1:v+YaWX3bdea5J/mo8dSETolEo7R71Vk1u8bnjau5yw4=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.4/go.mod h1:6rpuAdCZL397s3pYoYcLgu1mIlRU8Am5FuJP05cCM98=
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
@@ -34,6 +35,8 @@ github.com/gin-contrib/secure v0.0.1 h1:DMMx3xXDY+MLA9kzIPHksyzC5/V5J6014c/WAmdS
 github.com/gin-contrib/secure v0.0.1/go.mod h1:6kseOBFrSR3Is/kM1jDhCg/WsXAMvKJkuPvG9dGph/c=
 github.com/gin-contrib/sse v0.1.0 h1:Y/yl/+YNO8GZSjAhjMsSuLt29uWRFHdHYUb5lYOV9qE=
 github.com/gin-contrib/sse v0.1.0/go.mod h1:RHrZQHXnP2xjPF+u1gW/2HnVO7nvIa9PG3Gm+fLHvGI=
+github.com/gin-contrib/static v0.0.0-20191128031702-f81c604d8ac2 h1:xLG16iua01X7Gzms9045s2Y2niNpvSY/Zb1oBwgNYZY=
+github.com/gin-contrib/static v0.0.0-20191128031702-f81c604d8ac2/go.mod h1:VhW/Ch/3FhimwZb8Oj+qJmdMmoB8r7lmJ5auRjm50oQ=
 github.com/gin-gonic/autotls v0.0.0-20200314141124-cc69476aef2a h1:xdM4UWm9hrdOPTMTTXRNDAsln3LdXr0Ry1XRFUpbpjc=
 github.com/gin-gonic/autotls v0.0.0-20200314141124-cc69476aef2a/go.mod h1:GTnUDNd5zRw/BceSPHICHoH9fNaTSPHsFTU72wuK0YE=
 github.com/gin-gonic/gin v1.5.0/go.mod h1:Nd6IXA8m5kNZdNEHMBd93KT+mdY3+bewLgRvmCsR2Do=

@@ -4,6 +4,7 @@ import (
 	"encoding/gob"
 
 	"github.com/gin-contrib/secure"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/csrf"
 	adapter "github.com/gwatts/gin-adapter"
@@ -28,17 +29,24 @@ func Router(config *ServerConfig) *gin.Engine {
 		}),
 	)
 
+	// JavaScript SPA frontend
+	frontend := router.Group("/")
+	frontend.Use(static.Serve("/", static.LocalFile(config.StaticAssetsDir, false)))
+
 	handlers := &WireguardHandlers{ServerConfig: config}
 
+	// API
+	api := router.Group("/api")
+
 	// Authentication
-	auth := router.Group("/auth")
+	auth := api.Group("/auth")
 	auth.Use(ProviderWhitelistMiddleware)
 	auth.GET("/callback", handlers.OAuthCallbackHandler)
 	auth.GET("/authenticate", handlers.AuthenticateHandler)
 	auth.GET("/logout", handlers.LogoutHandler)
 
 	// Private routes
-	private := router.Group("/")
+	private := api.Group("/")
 	private.Use(AuthenticationRequiredMiddleware(config.SessionStore, config.SessionName))
 
 	if !config.IsDebug {
