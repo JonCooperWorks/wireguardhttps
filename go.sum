@@ -37,8 +37,6 @@ github.com/gin-contrib/sse v0.1.0 h1:Y/yl/+YNO8GZSjAhjMsSuLt29uWRFHdHYUb5lYOV9qE
 github.com/gin-contrib/sse v0.1.0/go.mod h1:RHrZQHXnP2xjPF+u1gW/2HnVO7nvIa9PG3Gm+fLHvGI=
 github.com/gin-contrib/static v0.0.0-20191128031702-f81c604d8ac2 h1:xLG16iua01X7Gzms9045s2Y2niNpvSY/Zb1oBwgNYZY=
 github.com/gin-contrib/static v0.0.0-20191128031702-f81c604d8ac2/go.mod h1:VhW/Ch/3FhimwZb8Oj+qJmdMmoB8r7lmJ5auRjm50oQ=
-github.com/gin-gonic/autotls v0.0.0-20200314141124-cc69476aef2a h1:xdM4UWm9hrdOPTMTTXRNDAsln3LdXr0Ry1XRFUpbpjc=
-github.com/gin-gonic/autotls v0.0.0-20200314141124-cc69476aef2a/go.mod h1:GTnUDNd5zRw/BceSPHICHoH9fNaTSPHsFTU72wuK0YE=
 github.com/gin-gonic/gin v1.5.0/go.mod h1:Nd6IXA8m5kNZdNEHMBd93KT+mdY3+bewLgRvmCsR2Do=
 github.com/gin-gonic/gin v1.6.2 h1:88crIK23zO6TqlQBt+f9FrPJNKm9ZEr7qjp9vl/d5TM=
 github.com/gin-gonic/gin v1.6.2/go.mod h1:75u5sXoLsGZoRN5Sgbi1eraJ4GU3++wFwWzhwvtwp4M=
@@ -103,12 +101,6 @@ github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD
 github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkryuEj+Srlc=
 github.com/jinzhu/now v1.0.1 h1:HjfetcXq097iXP0uoPCdnM4Efp5/9MsM0/M+XOTeR3M=
 github.com/jinzhu/now v1.0.1/go.mod h1:d3SSVoowX0Lcu0IBviAWJpolVfI5UJVZZ7cO71lE/z8=
-github.com/joncooperworks/wgrpcd v0.0.0-20200508215915-9484f7fbd8a5 h1:RR/5VFg8cfD3YuVldpWDjnEKOUavP0oyoXc5j8kLSPI=
-github.com/joncooperworks/wgrpcd v0.0.0-20200508215915-9484f7fbd8a5/go.mod h1:/0VYmPKnd9w0+Xg4jBC4Ufs8aQ3RoeHs8N6pI5ngcuI=
-github.com/joncooperworks/wgrpcd v0.0.0-20200514220619-94a8b72e3699 h1:HzAVMYZ92v0viLbRsSdKHrQCG4e8ET13J9DKYWcrXYc=
-github.com/joncooperworks/wgrpcd v0.0.0-20200514220619-94a8b72e3699/go.mod h1:/0VYmPKnd9w0+Xg4jBC4Ufs8aQ3RoeHs8N6pI5ngcuI=
-github.com/joncooperworks/wgrpcd v0.0.0-20200514220822-d2b4985378c0 h1:bGGUgPE/q/NaDQQvdLnjnO94phlngOa55bi8KvhAWBM=
-github.com/joncooperworks/wgrpcd v0.0.0-20200514220822-d2b4985378c0/go.mod h1:/0VYmPKnd9w0+Xg4jBC4Ufs8aQ3RoeHs8N6pI5ngcuI=
 github.com/joncooperworks/wgrpcd v0.0.0-20200514221312-0d81d5a030fb h1:jy5ZlvwnixlMlCfuyzTjH8IOVRELAUBuDDb4g9Wji3A=
 github.com/joncooperworks/wgrpcd v0.0.0-20200514221312-0d81d5a030fb/go.mod h1:/0VYmPKnd9w0+Xg4jBC4Ufs8aQ3RoeHs8N6pI5ngcuI=
 github.com/jsimonetti/rtnetlink v0.0.0-20190606172950-9527aa82566a/go.mod h1:Oz+70psSo5OFh8DBl0Zv2ACw7Esh6pPUphlvZG9x7uw=

@@ -2,17 +2,20 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log"
 	"math"
 	"net"
+	"net/http"
 	"net/url"
 	"os"
+	"os/user"
 	"path/filepath"
 	"strings"
 	"text/template"
+	"time"
 
-	"github.com/gin-gonic/autotls"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/sessions"
 	"github.com/joncooperworks/wgrpcd"
@@ -21,6 +24,7 @@ import (
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/azureadv2"
 	"github.com/urfave/cli/v2"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 func main() {
@@ -320,5 +324,46 @@ func actionServe(c *cli.Context) error {
 		return router.Run(listenAddr)
 	}
 
-	return autotls.Run(router, httpHost.String())
+	certCacheDir := cacheDir()
+	certManager := autocert.Manager{
+		Prompt:     autocert.AcceptTOS,
+		HostPolicy: autocert.HostWhitelist(httpHost.String()),
+		Cache:      autocert.DirCache(certCacheDir),
+	}
+
+	tlsConfig := &tls.Config{
+		GetCertificate: certManager.GetCertificate,
+		MinVersion:     tls.VersionTLS12,
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
+			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+		},
+	}
+
+	server := &http.Server{
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  120 * time.Second,
+		Addr:         ":https",
+		TLSConfig:    tlsConfig,
+		Handler:      router,
+	}
+	go http.ListenAndServe(":http", certManager.HTTPHandler(nil))
+
+	return server.ListenAndServeTLS("", "")
+}
+
+func cacheDir() (dir string) {
+	if u, _ := user.Current(); u != nil {
+		dir = filepath.Join(os.TempDir(), "cache-golang-autocert-"+u.Username)
+		if err := os.MkdirAll(dir, 0700); err == nil {
+			return dir
+		}
+	}
+
+	panic("couldnt create cert cache directory")
 }
