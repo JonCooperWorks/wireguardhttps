@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"os/user"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -319,10 +318,11 @@ func actionServe(c *cli.Context) error {
 		return router.Run(listenAddr)
 	}
 
-	certCacheDir := cacheDir()
+	hostname := httpHost.String()
+	certCacheDir := cacheDir(hostname)
 	certManager := autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
-		HostPolicy: autocert.HostWhitelist(httpHost.String()),
+		HostPolicy: autocert.HostWhitelist(hostname),
 		Cache:      autocert.DirCache(certCacheDir),
 	}
 
@@ -358,16 +358,14 @@ func actionServe(c *cli.Context) error {
 	return server.ListenAndServeTLS("", "")
 }
 
-func cacheDir() (dir string) {
-	if u, _ := user.Current(); u != nil {
-		dir = filepath.Join(os.TempDir(), "cache-golang-autocert-"+u.Username)
-		if _, err := os.Stat(dir); !os.IsNotExist(err) {
-			log.Println("Found cache dir:", dir)
-			return dir
-		}
-		if err := os.MkdirAll(dir, 0700); err == nil {
-			return dir
-		}
+func cacheDir(hostname string) (dir string) {
+	dir = filepath.Join(os.TempDir(), "cache-golang-autocert-"+hostname)
+	if _, err := os.Stat(dir); !os.IsNotExist(err) {
+		log.Println("Found cache dir:", dir)
+		return dir
+	}
+	if err := os.MkdirAll(dir, 0700); err == nil {
+		return dir
 	}
 
 	panic("couldnt create cert cache directory")
