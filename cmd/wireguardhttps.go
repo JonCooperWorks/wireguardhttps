@@ -319,11 +319,10 @@ func actionServe(c *cli.Context) error {
 	}
 
 	hostname := httpHost.String()
-	certCacheDir := cacheDir(hostname)
 	certManager := autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
 		HostPolicy: autocert.HostWhitelist(hostname),
-		Cache:      autocert.DirCache(certCacheDir),
+		Cache:      autocert.DirCache(cacheDir(hostname)),
 	}
 
 	tlsConfig := &tls.Config{
