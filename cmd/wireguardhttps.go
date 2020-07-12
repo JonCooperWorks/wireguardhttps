@@ -360,6 +360,10 @@ func actionServe(c *cli.Context) error {
 func cacheDir() (dir string) {
 	if u, _ := user.Current(); u != nil {
 		dir = filepath.Join(os.TempDir(), "cache-golang-autocert-"+u.Username)
+		if _, err := os.Stat(dir); !os.IsNotExist(err) {
+			log.Println("Found cache dir:", dir)
+			return dir
+		}
 		if err := os.MkdirAll(dir, 0700); err == nil {
 			return dir
 		}
