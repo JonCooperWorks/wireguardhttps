@@ -144,9 +144,9 @@ func main() {
 						Required: true,
 					},
 					&cli.StringSliceFlag{
-						Name:  "allowed-cdn",
-						Usage: "whitelisted CDNs for the CSP",
-						Value: cli.NewStringSlice("cdnjs.cloudflare.com"),
+						Name:     "allowed-cdn",
+						Usage:    "whitelisted CDNs for the CSP",
+						Required: false,
 					},
 				},
 				Action: actionServe,

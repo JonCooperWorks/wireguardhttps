@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/csrf"
 	"github.com/joncooperworks/wgrpcd"
 	"github.com/markbates/goth/gothic"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
@@ -244,6 +245,7 @@ func (wh *WireguardHandlers) ListUserDevicesHandler(c *gin.Context) {
 
 func (wh *WireguardHandlers) UserProfileInfoHandler(c *gin.Context) {
 	user := wh.user(c)
+	c.Header("X-CSRF-Token", csrf.Token(c.Request))
 	c.JSON(http.StatusOK, user)
 }
 
