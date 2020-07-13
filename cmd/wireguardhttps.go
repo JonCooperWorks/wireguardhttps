@@ -293,7 +293,7 @@ func actionServe(c *cli.Context) error {
 	store := sessions.NewFilesystemStore(os.TempDir(), []byte(c.String("session-secret")))
 	store.MaxAge(86400 * 30)
 	store.Options.Path = "/"
-	store.Options.HttpOnly = false
+	store.Options.HttpOnly = true
 	store.Options.Secure = !debugMode
 	store.MaxLength(math.MaxInt64)
 	gothic.Store = store

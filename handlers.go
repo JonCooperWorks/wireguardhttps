@@ -73,7 +73,7 @@ func (wh *WireguardHandlers) OAuthCallbackHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.Redirect(http.StatusTemporaryRedirect, "/")
 }
 
 func (wh *WireguardHandlers) AuthenticateHandler(c *gin.Context) {
