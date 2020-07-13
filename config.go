@@ -23,4 +23,5 @@ type ServerConfig struct {
 	SessionName     string
 	CSRFKey         []byte
 	StaticAssetsDir string
+	CDNWhitelist    []*url.URL
 }

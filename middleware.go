@@ -1,6 +1,7 @@
 package wireguardhttps
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -35,6 +36,7 @@ func AuthenticationRequiredMiddleware(store sessions.Store, sessionName string) 
 	return func(c *gin.Context) {
 		session, err := store.Get(c.Request, sessionName)
 		if err != nil {
+			log.Println(err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}

@@ -2,6 +2,8 @@ package wireguardhttps
 
 import (
 	"encoding/gob"
+	"fmt"
+	"strings"
 
 	"github.com/gin-contrib/secure"
 	"github.com/gin-contrib/static"
@@ -15,12 +17,18 @@ func Router(config *ServerConfig) *gin.Engine {
 	goth.UseProviders(config.AuthProviders...)
 	gob.Register(&UserProfile{})
 	router := gin.Default()
+
+	whitelist := []string{}
+	for _, origin := range config.CDNWhitelist {
+		whitelist = append(whitelist, origin.String())
+	}
+	csp := fmt.Sprintf("default-src 'self' https: 'unsafe-inline' %s", strings.Join(whitelist, " "))
 	router.Use(secure.New(
 		secure.Config{
 			BrowserXssFilter:      true,
 			IENoOpen:              true,
 			FrameDeny:             true,
-			ContentSecurityPolicy: "default-src 'self'",
+			ContentSecurityPolicy: csp,
 			ContentTypeNosniff:    true,
 			SSLRedirect:           !config.IsDebug,
 			IsDevelopment:         config.IsDebug,

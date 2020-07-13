@@ -143,6 +143,11 @@ func main() {
 						Usage:    "frontend js app",
 						Required: true,
 					},
+					&cli.StringSliceFlag{
+						Name:  "allowed-cdn",
+						Usage: "whitelisted CDNs for the CSP",
+						Value: cli.NewStringSlice("cdnjs.cloudflare.com"),
+					},
 				},
 				Action: actionServe,
 			},
@@ -292,6 +297,15 @@ func actionServe(c *cli.Context) error {
 	store.Options.Secure = !debugMode
 	store.MaxLength(math.MaxInt64)
 	gothic.Store = store
+
+	cdnWhitelist := []*url.URL{}
+	for _, cdn := range c.StringSlice("allowed-cdn") {
+		origin, err := url.Parse(cdn)
+		if err != nil {
+			return fmt.Errorf("--allowed-cdn must be a valid URL, got %v", httpHost)
+		}
+		cdnWhitelist = append(cdnWhitelist, origin)
+	}
 
 	config := &wireguardhttps.ServerConfig{
 		DNSServers:      dnsServers,
