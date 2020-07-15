@@ -22,7 +22,7 @@ func Router(config *ServerConfig) *gin.Engine {
 	for _, origin := range config.CDNWhitelist {
 		whitelist = append(whitelist, origin.String())
 	}
-	csp := fmt.Sprintf("default-src 'self' https: %s", strings.Join(whitelist, " "))
+	csp := fmt.Sprintf("default-src 'self'; object-src 'none'; base-uri 'none';  require-trusted-types-for 'script'; %s", strings.Join(whitelist, " "))
 	router.Use(secure.New(
 		secure.Config{
 			BrowserXssFilter:      true,
