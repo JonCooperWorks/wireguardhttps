@@ -24,4 +24,5 @@ type ServerConfig struct {
 	CSRFKey         []byte
 	StaticAssetsDir string
 	CDNWhitelist    []*url.URL
+	MaxCookieAge    int
 }

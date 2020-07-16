@@ -291,7 +291,8 @@ func actionServe(c *cli.Context) error {
 	}
 
 	store := sessions.NewFilesystemStore(os.TempDir(), []byte(c.String("session-secret")))
-	store.MaxAge(86400 * 30)
+	maxCookieAge := 86400 * 30
+	store.MaxAge(maxCookieAge)
 	store.Options.Path = "/"
 	store.Options.HttpOnly = true
 	store.Options.Secure = !debugMode
@@ -322,6 +323,7 @@ func actionServe(c *cli.Context) error {
 		IsDebug:         debugMode,
 		CSRFKey:         csrfSessionKey,
 		StaticAssetsDir: c.String("static-assets-dir"),
+		MaxCookieAge:    maxCookieAge,
 	}
 
 	router := wireguardhttps.Router(config)

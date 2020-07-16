@@ -9,7 +9,7 @@ import (
 // For example, if wireguardhttps is initialized with the subnet 10.0.0.0/24, an entry will be created in this table for every IP address between 10.0.0.0 and 10.0.0.255.
 type IPAddress struct {
 	gorm.Model
-	Address string `gorm:"PRIMARY_KEY"`
+	Address string `gorm:"PRIMARY_KEY;UNIQUE"`
 }
 
 // Device is a connected Wireguard peer.

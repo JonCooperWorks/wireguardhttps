@@ -74,6 +74,15 @@ func (wh *WireguardHandlers) OAuthCallbackHandler(c *gin.Context) {
 		return
 	}
 
+	c.SetCookie(
+		"isLoggedIn",
+		"true",
+		wh.MaxCookieAge,
+		"/",
+		wh.HTTPHost.String(),
+		true,
+		false,
+	)
 	c.Redirect(http.StatusTemporaryRedirect, "/")
 }
 
