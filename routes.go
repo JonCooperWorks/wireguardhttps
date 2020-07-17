@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/secure"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,8 @@ func Router(config *ServerConfig) *gin.Engine {
 	goth.UseProviders(config.AuthProviders...)
 	gob.Register(&UserProfile{})
 	router := gin.Default()
+
+	router.Use(gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedPaths([]string{"/api/"})))
 
 	whitelist := []string{}
 	for _, origin := range config.CDNWhitelist {
