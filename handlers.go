@@ -83,6 +83,8 @@ func (wh *WireguardHandlers) OAuthCallbackHandler(c *gin.Context) {
 		true,
 		false,
 	)
+
+	log.Printf("Successfully authenticated %v", user)
 	c.Redirect(http.StatusTemporaryRedirect, "/")
 }
 
@@ -143,7 +145,9 @@ func (wh *WireguardHandlers) NewDeviceHandler(c *gin.Context) {
 
 		return credentials, nil
 	}
-	_, credentials, err := wh.Database.CreateDevice(wh.user(c), deviceRequest.Name, deviceRequest.OS, deviceFunc)
+
+	user := wh.user(c)
+	device, credentials, err := wh.Database.CreateDevice(user, deviceRequest.Name, deviceRequest.OS, deviceFunc)
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -172,6 +176,7 @@ func (wh *WireguardHandlers) NewDeviceHandler(c *gin.Context) {
 		return
 	}
 
+	log.Printf("Successfully added device %v for user %v", device, user)
 	c.Header("Cache-Control", "no-store")
 	c.Data(http.StatusOK, "text/plain", buffer.Bytes())
 	buffer.Reset()
@@ -208,7 +213,7 @@ func (wh *WireguardHandlers) RekeyDeviceHandler(c *gin.Context) {
 
 		return credentials, nil
 	}
-	_, credentials, err := wh.Database.RekeyDevice(wh.user(c), device, rekeyFunc)
+	device, credentials, err := wh.Database.RekeyDevice(wh.user(c), device, rekeyFunc)
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -237,6 +242,7 @@ func (wh *WireguardHandlers) RekeyDeviceHandler(c *gin.Context) {
 		return
 	}
 
+	log.Printf("Successfully rekeyed device %v for user %v", device, user)
 	c.Header("Cache-Control", "no-store")
 	c.Data(http.StatusOK, "text/plain", buffer.Bytes())
 	buffer.Reset()
@@ -290,5 +296,6 @@ func (wh *WireguardHandlers) DeleteDeviceHandler(c *gin.Context) {
 		return
 	}
 
+	log.Printf("Deleted device %v for user %v", device, user)
 	c.AbortWithStatus(http.StatusNoContent)
 }
