@@ -60,7 +60,8 @@ func (a *AddressRange) Addresses() []net.IP {
 	addresses := []net.IP{}
 	start := binary.BigEndian.Uint32(a.Start())
 	finish := binary.BigEndian.Uint32(a.Finish())
-	for i := start; i <= finish; i++ {
+	// Don't allocate the VPN server's IP address to client devices
+	for i := start + 1; i <= finish; i++ {
 		ip := make(net.IP, 4)
 		binary.BigEndian.PutUint32(ip, i)
 		addresses = append(addresses, ip)
