@@ -308,6 +308,10 @@ func actionServe(c *cli.Context) error {
 		cdnWhitelist = append(cdnWhitelist, origin)
 	}
 
+	packetStream := &wireguardhttps.PacketStream{
+		DeviceName: wireguardDevice,
+	}
+
 	config := &wireguardhttps.ServerConfig{
 		DNSServers:      dnsServers,
 		Endpoint:        endpointURL,
@@ -324,11 +328,15 @@ func actionServe(c *cli.Context) error {
 		CSRFKey:         csrfSessionKey,
 		StaticAssetsDir: c.String("static-assets-dir"),
 		MaxCookieAge:    maxCookieAge,
+		PacketStream:    packetStream,
 	}
 
 	router := wireguardhttps.Router(config)
 
 	prompt()
+
+	// Make packets from the VPN interface available to the web app
+	go packetStream.Capture()
 
 	if config.IsDebug {
 		return router.Run(listenAddr)

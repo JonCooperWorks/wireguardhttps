@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
 	"github.com/joncooperworks/wgrpcd"
 	"github.com/markbates/goth/gothic"
@@ -298,4 +300,40 @@ func (wh *WireguardHandlers) DeleteDeviceHandler(c *gin.Context) {
 
 	log.Printf("Deleted device %v for user %v", device, user)
 	c.AbortWithStatus(http.StatusNoContent)
+}
+
+func (wh *WireguardHandlers) StreamPCAPHandler(c *gin.Context) {
+	// TODO: get user from signed URL params
+	user := wh.user(c)
+	deviceID, err := strconv.Atoi(c.Param("device_id"))
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	device, err := wh.Database.Device(user, deviceID)
+	if err != nil {
+		wh.respondToError(c, err)
+		return
+	}
+
+	// Create a unique ID for each client to allow multiple clients to subscribe to the same traffic stream.
+	uuid := uuid.New().String()
+	address := net.ParseIP(device.IPAddress)
+	packets := wh.PacketStream.Subscribe(address, uuid)
+
+	// We don't care why the client left, just stop streaming packets
+	_ = c.Stream(func(writer io.Writer) bool {
+		// TODO: Send SSEvent with PCAP header
+		if packet, ok := <-packets; ok {
+			log.Println(packet)
+			// TODO: serialize packet
+			// TODO: Send SSEvent with packet bytes
+		}
+
+		return false
+	})
+
+	wh.PacketStream.Unsubscribe(uuid)
+	return
 }

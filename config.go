@@ -25,4 +25,5 @@ type ServerConfig struct {
 	StaticAssetsDir string
 	CDNWhitelist    []*url.URL
 	MaxCookieAge    int
+	PacketStream    *PacketStream
 }
