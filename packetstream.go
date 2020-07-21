@@ -100,6 +100,7 @@ func (p *PacketStream) sendPacketToSubscribers(flow *Flow, packet gopacket.Packe
 func (p *PacketStream) Subscribe(ip net.IP, nonce string) <-chan gopacket.Packet {
 	address := ip.String()
 	subscription := make(chan gopacket.Packet)
+	p.subscriberRegistry[address] = SubscriberSet{}
 	p.subscriberRegistry[address][nonce] = true
 	p.subscribers[nonce] = subscription
 	return subscription
