@@ -345,5 +345,4 @@ func (wh *WireguardHandlers) StreamPCAPHandler(c *gin.Context) {
 
 	log.Printf("Stopped logging traffic for %v by %v", device, user)
 	wh.PacketStream.Unsubscribe(address, uuid)
-	return
 }
