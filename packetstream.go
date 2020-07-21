@@ -22,19 +22,23 @@ type Flow struct {
 	Dst net.IP
 }
 
+// SubscriberSet implements a Set data type for unique entries and O(1) deletion.
+type SubscriberSet map[string]bool
+
 // PacketStream allows for recording traffic sent over the VPN interface.
 // It maintains a one-to-many mapping of device IP addresses to listener key IDs, and a one-to-one mapping of listener key IDs to subscription channels.
 // It is intended to quickly sort traffic intended for listeners only when there is an active listener, and do nothing otherwise.
 type PacketStream struct {
 	DeviceName         string
-	subscriberRegistry map[string][]string
+	subscriberRegistry map[string]SubscriberSet
 	subscribers        map[string]chan gopacket.Packet
 }
 
+// NewPacketStream returns a PacketStream configured to stream packets from the named device.
 func NewPacketStream(deviceName string) *PacketStream {
 	return &PacketStream{
 		DeviceName:         deviceName,
-		subscriberRegistry: map[string][]string{},
+		subscriberRegistry: map[string]SubscriberSet{},
 		subscribers:        map[string]chan gopacket.Packet{},
 	}
 }
@@ -76,7 +80,7 @@ func (p *PacketStream) sendPacketToSubscribers(flow *Flow, packet gopacket.Packe
 	// If traffic is going to or from a subscriber, send the packet to that subscriber.
 	srcSubscribers, ok := p.subscriberRegistry[flow.Src.String()]
 	if ok {
-		for _, subscriberUUID := range srcSubscribers {
+		for subscriberUUID := range srcSubscribers {
 			subscriber := p.subscribers[subscriberUUID]
 			subscriber <- packet
 		}
@@ -84,7 +88,7 @@ func (p *PacketStream) sendPacketToSubscribers(flow *Flow, packet gopacket.Packe
 
 	dstSubscribers, ok := p.subscriberRegistry[flow.Dst.String()]
 	if ok {
-		for _, subscriberUUID := range dstSubscribers {
+		for subscriberUUID := range dstSubscribers {
 			subscriber := p.subscribers[subscriberUUID]
 			subscriber <- packet
 		}
@@ -96,14 +100,17 @@ func (p *PacketStream) sendPacketToSubscribers(flow *Flow, packet gopacket.Packe
 func (p *PacketStream) Subscribe(ip net.IP, nonce string) <-chan gopacket.Packet {
 	address := ip.String()
 	subscription := make(chan gopacket.Packet)
-	p.subscriberRegistry[address] = append(p.subscriberRegistry[address], nonce)
+	p.subscriberRegistry[address][nonce] = true
 	p.subscribers[nonce] = subscription
 	return subscription
 }
 
 // Unsubscribe removes a callback from the registry.
-func (p *PacketStream) Unsubscribe(nonce string) {
-	delete(p.subscriberRegistry, nonce)
+func (p *PacketStream) Unsubscribe(ip net.IP, nonce string) {
+	address := ip.String()
+	close(p.subscribers[nonce])
+	delete(p.subscriberRegistry[address], nonce)
+	delete(p.subscribers, nonce)
 }
 
 func sourceIP(parser *gopacket.DecodingLayerParser, rawPacket gopacket.Packet, ip4 layers.IPv4) *Flow {
