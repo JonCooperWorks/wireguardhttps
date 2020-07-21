@@ -31,6 +31,14 @@ type PacketStream struct {
 	subscribers        map[string]chan gopacket.Packet
 }
 
+func NewPacketStream(deviceName string) *PacketStream {
+	return &PacketStream{
+		DeviceName:         deviceName,
+		subscriberRegistry: map[string][]string{},
+		subscribers:        map[string]chan gopacket.Packet{},
+	}
+}
+
 // Capture is meant to be run in a background goroutine from the main thread.
 // It listens on the VPN interface and passes packets back to subscribers.
 func (p *PacketStream) Capture() {

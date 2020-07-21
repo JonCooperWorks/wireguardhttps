@@ -308,9 +308,7 @@ func actionServe(c *cli.Context) error {
 		cdnWhitelist = append(cdnWhitelist, origin)
 	}
 
-	packetStream := &wireguardhttps.PacketStream{
-		DeviceName: wireguardDevice,
-	}
+	packetStream := wireguardhttps.NewPacketStream(wireguardDevice)
 
 	config := &wireguardhttps.ServerConfig{
 		DNSServers:      dnsServers,
