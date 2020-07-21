@@ -324,6 +324,7 @@ func (wh *WireguardHandlers) StreamPCAPHandler(c *gin.Context) {
 	uuid := uuid.New().String()
 	address := net.ParseIP(device.IPAddress)
 	packets := wh.PacketStream.Subscribe(address, uuid)
+	defer wh.PacketStream.Unsubscribe(address, uuid)
 
 	// Write PCAP file header so Wireguard and other tools can recognize that the stream is a PCAP file.
 	buffer := &bytes.Buffer{}
@@ -338,11 +339,11 @@ func (wh *WireguardHandlers) StreamPCAPHandler(c *gin.Context) {
 			buffer.Reset()
 			pcapWriter.WritePacket(packet.Metadata().CaptureInfo, packet.Data())
 			c.SSEvent("pcap", buffer.Bytes())
+			return true
 		}
 
-		return true
+		return false
 	})
 
 	log.Printf("Stopped logging traffic for %v by %v", device, user)
-	wh.PacketStream.Unsubscribe(address, uuid)
 }
