@@ -63,12 +63,14 @@ func Router(config *ServerConfig) *gin.Engine {
 		csrfMiddleware := csrf.Protect(config.CSRFKey)
 		private.Use(adapter.Wrap(csrfMiddleware))
 	}
+
 	// Devices
-	private.POST("/devices", handlers.NewDeviceHandler)
-	private.POST("/devices/:device_id", handlers.RekeyDeviceHandler)
-	private.DELETE("/devices/:device_id", handlers.DeleteDeviceHandler)
-	private.GET("/devices", handlers.ListUserDevicesHandler)
-	private.GET("/devices/traffic/:device_id", handlers.StreamPCAPHandler)
+	devices := private.Group("/devices")
+	devices.GET("/", handlers.ListUserDevicesHandler)
+	devices.POST("/", handlers.NewDeviceHandler)
+	devices.POST("/:device_id", handlers.RekeyDeviceHandler)
+	devices.DELETE("/:device_id", handlers.DeleteDeviceHandler)
+	devices.GET("/:device_id/traffic", handlers.StreamPCAPHandler)
 
 	// User Profile
 	private.GET("/me", handlers.UserProfileInfoHandler)
