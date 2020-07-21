@@ -11,6 +11,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/gopacket/layers"
+	"github.com/google/gopacket/pcapgo"
 	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
 	"github.com/joncooperworks/wgrpcd"
@@ -317,23 +319,31 @@ func (wh *WireguardHandlers) StreamPCAPHandler(c *gin.Context) {
 		return
 	}
 
-	// Create a unique ID for each client to allow multiple clients to subscribe to the same traffic stream.
+	log.Printf("Logging traffic for %v by %v", device, user)
+	// Create a unique ID for each client to allow multiple clients to subscribe to the same device's traffic stream.
 	uuid := uuid.New().String()
 	address := net.ParseIP(device.IPAddress)
 	packets := wh.PacketStream.Subscribe(address, uuid)
 
+	// Write PCAP file header so Wireguard and other tools can recognize that the stream is a PCAP file.
+	buffer := &bytes.Buffer{}
+	pcapWriter := pcapgo.NewWriter(buffer)
+	pcapWriter.WriteFileHeader(1024, layers.LinkTypeEthernet)
+	c.SSEvent("pcap", buffer.Bytes())
+
 	// We don't care why the client left, just stop streaming packets
 	_ = c.Stream(func(writer io.Writer) bool {
-		// TODO: Send SSEvent with PCAP header
 		if packet, ok := <-packets; ok {
-			log.Println(packet)
-			// TODO: serialize packet
-			// TODO: Send SSEvent with packet bytes
+			// Clear buffer for the next packet
+			buffer.Reset()
+			pcapWriter.WritePacket(packet.Metadata().CaptureInfo, packet.Data())
+			c.SSEvent("pcap", buffer.Bytes())
 		}
 
-		return false
+		return true
 	})
 
-	wh.PacketStream.Unsubscribe(uuid)
+	log.Printf("Stopped logging traffic for %v by %v", device, user)
+	wh.PacketStream.Unsubscribe(address, uuid)
 	return
 }
