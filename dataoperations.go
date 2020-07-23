@@ -144,7 +144,8 @@ func (d *dataOperations) RemoveDevice(owner UserProfile, device Device, deleteFu
 		return err
 	}
 
-	err = d.db.Where("owner_id = ?", owner.ID).
+	err = d.db.Unscoped().
+		Where("owner_id = ?", owner.ID).
 		Delete(&device).Error
 	return wrapPackageError(err)
 }
