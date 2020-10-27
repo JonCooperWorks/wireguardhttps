@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math"
 	"net"
@@ -24,6 +25,7 @@ import (
 	"github.com/markbates/goth/providers/azureadv2"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/crypto/acme/autocert"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -143,10 +145,40 @@ func main() {
 						Usage:    "frontend js app",
 						Required: true,
 					},
-					&cli.StringSliceFlag{
-						Name:     "allowed-cdn",
-						Usage:    "whitelisted CDNs for the CSP",
+					&cli.StringFlag{
+						Name:     "auth0-client-id",
+						Usage:    "auth0.com client id",
 						Required: false,
+					},
+					&cli.StringFlag{
+						Name:     "auth0-client-secret",
+						Usage:    "auth0 client secret",
+						Required: true,
+					},
+					&cli.StringFlag{
+						Name:     "auth0-audience",
+						Usage:    "auth0 audience",
+						Required: true,
+					},
+					&cli.StringFlag{
+						Name:     "auth0-token-url",
+						Usage:    "auth0 token url",
+						Required: true,
+					},
+					&cli.StringFlag{
+						Name:  "wgrpcd-ca-cert",
+						Usage: "wgrpcd CA cert",
+						Value: "cacert.pem",
+					},
+					&cli.StringFlag{
+						Name:  "wgrpcd-client-cert",
+						Usage: "wgrpcd client cert",
+						Value: "clientcert.pem",
+					},
+					&cli.StringFlag{
+						Name:  "wgrpcd-client-key",
+						Usage: "wgrpcd client key",
+						Value: "clientkey.pem",
 					},
 				},
 				Action: actionServe,
@@ -247,9 +279,37 @@ func actionServe(c *cli.Context) error {
 		return err
 	}
 
-	wireguardClient := &wgrpcd.GRPCClient{
-		GrpcAddress: wgRPCdAddress,
-		DeviceName:  wireguardDevice,
+	clientKeyBytes, err := ioutil.ReadFile(c.String("wgrpcd-client-key"))
+	if err != nil {
+		log.Fatalf("failed to read client key: %v", err)
+	}
+
+	clientCertBytes, err := ioutil.ReadFile(c.String("wgrpcd-client-cert"))
+	if err != nil {
+		log.Fatalf("failed to read server cert: %v", err)
+	}
+
+	opts := []grpc.DialOption{
+		wgrpcd.OAuth2ClientCredentials(
+			context.Background(),
+			c.String("auth0-client-id"),
+			c.String("auth0-client-secret"),
+			c.String("auth0-token-url"),
+			c.String("auth0-audience"),
+		),
+	}
+
+	config := &wgrpcd.ClientConfig{
+		ClientKeyBytes:  clientKeyBytes,
+		ClientCertBytes: clientCertBytes,
+		CACertFilename:  c.String("wgrpcd-ca-cert"),
+		GRPCAddress:     wgRPCdAddress,
+		Options:         opts,
+	}
+
+	wireguardClient, err := wgrpcd.NewClient(config)
+	if err != nil {
+		return err
 	}
 
 	devices, err := wireguardClient.Devices(context.Background())
@@ -308,13 +368,14 @@ func actionServe(c *cli.Context) error {
 		cdnWhitelist = append(cdnWhitelist, origin)
 	}
 
-	config := &wireguardhttps.ServerConfig{
-		DNSServers:      dnsServers,
-		Endpoint:        endpointURL,
-		HTTPHost:        httpHost,
-		Templates:       templates,
-		WireguardClient: wireguardClient,
-		Database:        database,
+	serverConfig := &wireguardhttps.ServerConfig{
+		DNSServers:          dnsServers,
+		Endpoint:            endpointURL,
+		HTTPHost:            httpHost,
+		Templates:           templates,
+		WireguardDeviceName: wireguardDevice,
+		WireguardClient:     wireguardClient,
+		Database:            database,
 		AuthProviders: []goth.Provider{
 			azureadv2.New(azureADKey, azureADSecret, azureADCallbackURL, azureadv2.ProviderOptions{Tenant: azureadv2.TenantType(c.String("ad-tenant"))}),
 		},
@@ -326,11 +387,17 @@ func actionServe(c *cli.Context) error {
 		MaxCookieAge:    maxCookieAge,
 	}
 
-	router := wireguardhttps.Router(config)
+	router := wireguardhttps.Router(serverConfig)
 
 	prompt()
 
-	if config.IsDebug {
+	if serverConfig.IsDebug {
+		return router.Run(listenAddr)
+	}
+
+	// If we're on Heroku, listen for $PORT, we'll get SSL from Cloudflare.
+	if os.Getenv("PORT") != "" {
+		listenAddr = fmt.Sprintf(":%s", os.Getenv("PORT"))
 		return router.Run(listenAddr)
 	}
 

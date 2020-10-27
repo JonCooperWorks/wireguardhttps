@@ -138,7 +138,7 @@ func (wh *WireguardHandlers) NewDeviceHandler(c *gin.Context) {
 			return nil, err
 		}
 
-		credentials, err := wh.WireguardClient.CreatePeer(context.Background(), []net.IPNet{*network})
+		credentials, err := wh.WireguardClient.CreatePeer(context.Background(), wh.WireguardDeviceName, []net.IPNet{*network})
 		if err != nil {
 			return nil, err
 		}
@@ -206,7 +206,7 @@ func (wh *WireguardHandlers) RekeyDeviceHandler(c *gin.Context) {
 		if err != nil {
 			return nil, err
 		}
-		credentials, err := wh.WireguardClient.RekeyPeer(context.Background(), publicKey, []net.IPNet{*network})
+		credentials, err := wh.WireguardClient.RekeyPeer(context.Background(), wh.WireguardDeviceName, publicKey, []net.IPNet{*network})
 		if err != nil {
 			return nil, err
 		}
@@ -283,7 +283,7 @@ func (wh *WireguardHandlers) DeleteDeviceHandler(c *gin.Context) {
 		if err != nil {
 			return err
 		}
-		_, err = wh.WireguardClient.RemovePeer(context.Background(), publicKey)
+		_, err = wh.WireguardClient.RemovePeer(context.Background(), wh.WireguardDeviceName, publicKey)
 		if err != nil {
 			return err
 		}
