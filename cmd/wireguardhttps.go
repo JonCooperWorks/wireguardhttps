@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"math"
 	"net"
 	"net/http"
 	"net/url"
@@ -146,23 +145,28 @@ func main() {
 						Required: true,
 					},
 					&cli.StringFlag{
-						Name:     "auth0-client-id",
-						Usage:    "auth0.com client id",
-						Required: false,
-					},
-					&cli.StringFlag{
-						Name:     "auth0-client-secret",
-						Usage:    "auth0 client secret",
+						Name:     "openid-provider",
+						Usage:    "Client ID from the OAuth2 provider",
 						Required: true,
 					},
 					&cli.StringFlag{
-						Name:     "auth0-audience",
-						Usage:    "auth0 audience",
+						Name:     "openid-client-id",
+						Usage:    "Client ID from the OAuth2 provider",
 						Required: true,
 					},
 					&cli.StringFlag{
-						Name:     "auth0-token-url",
-						Usage:    "auth0 token url",
+						Name:     "openid-client-secret",
+						Usage:    "Client secret from the OAuth2 provider",
+						Required: true,
+					},
+					&cli.StringFlag{
+						Name:     "openid-audience",
+						Usage:    "Audience from the OAuth2 provider",
+						Required: true,
+					},
+					&cli.StringFlag{
+						Name:     "openid-token-url",
+						Usage:    "Token url from the OAuth2 provider",
 						Required: true,
 					},
 					&cli.StringFlag{
@@ -289,14 +293,36 @@ func actionServe(c *cli.Context) error {
 		log.Fatalf("failed to read server cert: %v", err)
 	}
 
-	opts := []grpc.DialOption{
-		wgrpcd.OAuth2ClientCredentials(
+	clientID := c.String("openid-client-id")
+	clientSecret := c.String("openid-client-secret")
+	tokenURL := c.String("openid-token-url")
+	audience := c.String("openid-audience")
+	openIDProvider := c.String("openid-provider")
+
+	opts := []grpc.DialOption{}
+	switch openIDProvider {
+	case "auth0":
+		creds := wgrpcd.Auth0ClientCredentials(
 			context.Background(),
-			c.String("auth0-client-id"),
-			c.String("auth0-client-secret"),
-			c.String("auth0-token-url"),
-			c.String("auth0-audience"),
-		),
+			clientID,
+			clientSecret,
+			tokenURL,
+			audience,
+		)
+		opts = append(opts, creds)
+
+	case "aws":
+		creds := wgrpcd.AWSCognitoClientCredentials(
+			context.Background(),
+			clientID,
+			clientSecret,
+			tokenURL,
+			audience,
+		)
+		opts = append(opts, creds)
+
+	default:
+		return fmt.Errorf("--openid-provider must be 'aws' or 'auth0', got %s", openIDProvider)
 	}
 
 	config := &wgrpcd.ClientConfig{
@@ -350,13 +376,12 @@ func actionServe(c *cli.Context) error {
 		return fmt.Errorf("CSRF session key must be 32 bytes, got %v", len(csrfSessionKey))
 	}
 
-	store := sessions.NewFilesystemStore(os.TempDir(), []byte(c.String("session-secret")))
+	store := sessions.NewCookieStore([]byte(c.String("session-secret")))
 	maxCookieAge := 86400 * 30
 	store.MaxAge(maxCookieAge)
 	store.Options.Path = "/"
 	store.Options.HttpOnly = true
 	store.Options.Secure = !debugMode
-	store.MaxLength(math.MaxInt64)
 	gothic.Store = store
 
 	cdnWhitelist := []*url.URL{}
