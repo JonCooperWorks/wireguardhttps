@@ -184,6 +184,11 @@ func main() {
 						Usage: "wgrpcd client key",
 						Value: "clientkey.pem",
 					},
+					&cli.StringSliceFlag{
+						Name:     "allowed-cdn",
+						Required: false,
+						Usage:    "CDN whitelist for CSP",
+					},
 				},
 				Action: actionServe,
 			},
@@ -317,7 +322,6 @@ func actionServe(c *cli.Context) error {
 			clientID,
 			clientSecret,
 			tokenURL,
-			audience,
 		)
 		opts = append(opts, creds)
 
@@ -393,6 +397,7 @@ func actionServe(c *cli.Context) error {
 		cdnWhitelist = append(cdnWhitelist, origin)
 	}
 
+	isHeroku := os.Getenv("HEROKU") != ""
 	serverConfig := &wireguardhttps.ServerConfig{
 		DNSServers:          dnsServers,
 		Endpoint:            endpointURL,
@@ -410,6 +415,8 @@ func actionServe(c *cli.Context) error {
 		CSRFKey:         csrfSessionKey,
 		StaticAssetsDir: c.String("static-assets-dir"),
 		MaxCookieAge:    maxCookieAge,
+		IsHeroku:        isHeroku,
+		CDNWhitelist:    cdnWhitelist,
 	}
 
 	router := wireguardhttps.Router(serverConfig)

@@ -2,8 +2,6 @@ package wireguardhttps
 
 import (
 	"encoding/gob"
-	"fmt"
-	"strings"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/secure"
@@ -21,21 +19,15 @@ func Router(config *ServerConfig) *gin.Engine {
 
 	router.Use(gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedPaths([]string{"/api/"})))
 
-	whitelist := []string{}
-	for _, origin := range config.CDNWhitelist {
-		whitelist = append(whitelist, origin.String())
-	}
-	csp := fmt.Sprintf("default-src 'self'; object-src 'none'; base-uri 'none';  require-trusted-types-for 'script'; %s", strings.Join(whitelist, " "))
 	router.Use(secure.New(
 		secure.Config{
-			BrowserXssFilter:      true,
-			IENoOpen:              true,
-			FrameDeny:             true,
-			ContentSecurityPolicy: csp,
-			ContentTypeNosniff:    true,
-			SSLRedirect:           !config.IsDebug,
-			IsDevelopment:         config.IsDebug,
-			AllowedHosts:          []string{config.HTTPHost.String()},
+			BrowserXssFilter:   true,
+			IENoOpen:           true,
+			FrameDeny:          true,
+			ContentTypeNosniff: true,
+			SSLRedirect:        false,
+			IsDevelopment:      config.IsDebug,
+			AllowedHosts:       []string{config.HTTPHost.String()},
 		}),
 	)
 

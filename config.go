@@ -10,6 +10,7 @@ import (
 	"github.com/markbates/goth"
 )
 
+// ServerConfig contains all info needed to configure a WireguardHTTPS instance.
 type ServerConfig struct {
 	DNSServers          []net.IP
 	Endpoint            *url.URL
@@ -26,4 +27,5 @@ type ServerConfig struct {
 	StaticAssetsDir     string
 	CDNWhitelist        []*url.URL
 	MaxCookieAge        int
+	IsHeroku            bool
 }
