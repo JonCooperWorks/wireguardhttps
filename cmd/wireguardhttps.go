@@ -341,6 +341,12 @@ func actionServe(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	err = wireguardClient.Connect()
+	if err != nil {
+		return err
+	}
+
+	defer wireguardClient.Close()
 
 	devices, err := wireguardClient.Devices(context.Background())
 	if err != nil {

@@ -11,7 +11,7 @@ require (
 	github.com/gorilla/sessions v1.1.1
 	github.com/gwatts/gin-adapter v0.0.0-20170508204228-c44433c485ad
 	github.com/jinzhu/gorm v1.9.12
-	github.com/joncooperworks/wgrpcd v0.0.0-20201122214828-49f67d3af58a
+	github.com/joncooperworks/wgrpcd v0.0.0-20201125162524-278549c97517
 	github.com/markbates/goth v1.64.0
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect

@@ -122,6 +122,8 @@ github.com/joncooperworks/wgrpcd v0.0.0-20201122211701-f39a447ee7f1 h1:8si8HuTVA
 github.com/joncooperworks/wgrpcd v0.0.0-20201122211701-f39a447ee7f1/go.mod h1:RHiWXkLKMCVqRL+oFbkCyK1FseHM934vd8DbvNTRLwY=
 github.com/joncooperworks/wgrpcd v0.0.0-20201122214828-49f67d3af58a h1:AfzySiNd+BFrd9msCWJJ6by2Xh82ZYr2uDaaLmXNxpM=
 github.com/joncooperworks/wgrpcd v0.0.0-20201122214828-49f67d3af58a/go.mod h1:RHiWXkLKMCVqRL+oFbkCyK1FseHM934vd8DbvNTRLwY=
+github.com/joncooperworks/wgrpcd v0.0.0-20201125162524-278549c97517 h1:ZT6fTD6NNiaVOAcVc8fWE3reuAtKeEE18dCxB5wni/Y=
+github.com/joncooperworks/wgrpcd v0.0.0-20201125162524-278549c97517/go.mod h1:RHiWXkLKMCVqRL+oFbkCyK1FseHM934vd8DbvNTRLwY=
 github.com/jsimonetti/rtnetlink v0.0.0-20190606172950-9527aa82566a/go.mod h1:Oz+70psSo5OFh8DBl0Zv2ACw7Esh6pPUphlvZG9x7uw=
 github.com/jsimonetti/rtnetlink v0.0.0-20200117123717-f846d4f6c1f4 h1:nwOc1YaOrYJ37sEBrtWZrdqzK22hiJs3GpDmP3sR2Yw=
 github.com/jsimonetti/rtnetlink v0.0.0-20200117123717-f846d4f6c1f4/go.mod h1:WGuG/smIU4J/54PblvSbh+xvCZmpJnFgr3ds6Z55XMQ=
