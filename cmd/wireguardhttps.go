@@ -17,6 +17,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/sessions"
+	"github.com/joncooperworks/grpcauth"
 	"github.com/joncooperworks/wgrpcd"
 	"github.com/joncooperworks/wireguardhttps"
 	"github.com/markbates/goth"
@@ -307,7 +308,7 @@ func actionServe(c *cli.Context) error {
 	opts := []grpc.DialOption{}
 	switch openIDProvider {
 	case "auth0":
-		creds := wgrpcd.Auth0ClientCredentials(
+		creds := grpcauth.Auth0M2MClientCredentials(
 			context.Background(),
 			clientID,
 			clientSecret,
@@ -317,7 +318,7 @@ func actionServe(c *cli.Context) error {
 		opts = append(opts, creds)
 
 	case "aws":
-		creds := wgrpcd.AWSCognitoClientCredentials(
+		creds := grpcauth.AWSCognitoAppClientCredentials(
 			context.Background(),
 			clientID,
 			clientSecret,
